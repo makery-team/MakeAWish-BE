@@ -16,7 +16,7 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Store {
+public class Store extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,18 +44,28 @@ public class Store {
     private Integer reviewCount = 0;
 
     /**
-     * 사장님별 커스텀 주문서 양식 (JSONB)
+     * 사장님별 커스텀 주문서 양식 (JSON)
      * 예: {"templates": [{"label": "맛 선택", "type": "select", "options": ["초코", "바닐라"]}]}
      */
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
     private Map<String, Object> orderSchema;
 
     /**
-     * 사장님(User)과의 연관관계 (1:1)
+     * 사장님과의 관계
+     * SellerProfile "1" --> "0..*" Store
      */
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private User owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_profile_id")
+    private SellerProfile sellerProfile;
+
+    /**
+     * 카테고리 관계
+     * Store "1" --> "0..*" StoreCategory
+     */
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<StoreCategory> storeCategories = new ArrayList<>();
 
     /**
      * 포트폴리오 목록 (1:N)

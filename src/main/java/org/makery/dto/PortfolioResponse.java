@@ -1,6 +1,8 @@
 package org.makery.dto;
 
 import org.makery.domain.Portfolio;
+import org.makery.domain.Tag;
+
 import java.util.List;
 
 public record PortfolioResponse(
@@ -14,9 +16,11 @@ public record PortfolioResponse(
         return new PortfolioResponse(
                 portfolio.getId(),
                 portfolio.getImageUrl(),
-                portfolio.getTags(),
+                portfolio.getTags().stream()
+                        .map(Tag::getName)
+                        .toList(),
                 portfolio.isInpaintingAllowed(),
-                portfolio.getLikeCount()
+                portfolio.getLikes() != null ? portfolio.getLikes().size() : 0
         );
     }
 }
