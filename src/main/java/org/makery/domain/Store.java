@@ -2,15 +2,11 @@ package org.makery.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Entity
-@Table(name = "stores") // DB 예약어와 충돌 방지를 위해 테이블명 명시
+@Table(name = "stores")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,62 +19,45 @@ public class Store {
     private Long id;
 
     @Column(nullable = false)
-    private String name; // 매장명
+    private String name;
 
     @Column(length = 1000)
-    private String description; // 매장 소개
+    private String description;
 
-    private String hours; // 영업 시간
-
-    private String notice; // 공지사항
-
-    // --- 위치 정보 (위치 기반 검색용) ---
+    private String hours;
+    private String notice;
     private Double latitude;
     private Double longitude;
 
-    // --- 평점 및 리뷰 통계 ---
     @Builder.Default
     private Double rating = 0.0;
 
     @Builder.Default
     private Integer reviewCount = 0;
 
-    /**
-     * 사장님별 커스텀 주문서 양식 (JSONB)
-     * 예: {"templates": [{"label": "맛 선택", "type": "select", "options": ["초코", "바닐라"]}]}
-     */
-    @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, Object> orderSchema;
+    @Column(name = "order_schema", columnDefinition = "TEXT")
+    private String orderSchema;
 
-    /**
-     * 사장님(User)과의 연관관계 (1:1)
-     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    /**
-     * 포트폴리오 목록 (1:N)
-     */
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Portfolio> portfolios = new ArrayList<>();
 
-    // --- 비즈니스 로직 ---
+    // 💡 리뷰와의 일대다(1:N) 관계 추가!
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
 
-    /**
-     * 매장 정보 업데이트
-     */
     public void updateProfile(String description, String hours, String notice) {
         this.description = description;
         this.hours = hours;
         this.notice = notice;
     }
 
-    /**
-     * 주문서 양식 업데이트
-     */
-    public void updateOrderSchema(Map<String, Object> newSchema) {
+    public void updateOrderSchema(String newSchema) {
         this.orderSchema = newSchema;
     }
 }

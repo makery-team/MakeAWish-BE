@@ -50,25 +50,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(HttpMethod.GET, "/api/portfolios").permitAll()
+                        // 💡 뒤에 /**를 붙여서 상세 페이지(/api/stores/1 등)까지 모두 허용합니다!
+                        .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()
                         .requestMatchers("/chats/**").permitAll()
 
+                        // 그 외 모든 요청은 로그인이 필요함
                         .anyRequest().authenticated()
                 )
-//                .formLogin(form -> form
-//                        .loginProcessingUrl("/api/login")
-//                        .usernameParameter("loginId")
-//                        .passwordParameter("password")
-//                        .successForwardUrl("/api/login-success")
-//                        .failureForwardUrl("/api/login-fail")
-//                )
-//                .logout(logout -> logout
-//                        .logoutUrl("/api/logout")
-//                        .logoutSuccessUrl("/api/logout-success")
-//                        .invalidateHttpSession(true)
-//                        .deleteCookies("JSESSIONID")
-//                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
@@ -85,4 +73,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
