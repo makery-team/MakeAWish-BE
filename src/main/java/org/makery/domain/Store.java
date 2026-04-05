@@ -79,7 +79,7 @@ public class Store extends BaseEntity {
     /**
      * 매장 정보 업데이트
      */
-    public void updateProfile(String description, String hours, String notice) {
+    public void update(String description, String hours, String notice) {
         this.description = description;
         this.hours = hours;
         this.notice = notice;

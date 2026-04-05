@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table(name = "users") // user는 DB 예약어인 경우가 많아 users로 설정
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,36 +22,35 @@ public class User extends BaseEntity {
     private String email;
 
     @NotNull
-    private String nickname;
+    private String name;
 
-    @NotNull
+    // 소셜 로그인 시 번호를 못 가져올 수 있으므로 NotNull 해제 권장
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
     private Language language;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
-    private OAuthProvider provider;
+    private OAuthProvider oAuthProvider;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private SellerProfile sellerProfile;
 
-    @Builder
-    public User(String email, String nickname, UserRole userRole) {
-        this.email = email;
-        this.nickname = nickname;
-        this.userRole = userRole;
-    }
-
     // --- 비즈니스 로직 ---
 
-    public void updateProfile(String email, Language language) {
-        this.email = email;
+    // 1. 단순 이름 업데이트 (OAuth2UserCustomService용)
+    public User update(String name) {
+        this.name = name;
+        return this;
+    }
+
+    // 2. 이름과 언어 업데이트 (UserService용)
+    public User update(String name, Language language) {
+        this.name = name;
         this.language = language;
+        return this;
     }
 }
