@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.3'
+    id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
@@ -37,7 +37,7 @@ dependencies {
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
     // AWS (Spring Boot 3 호환 버전)
-//    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
@@ -46,12 +46,6 @@ dependencies {
 
     // Websocket
     implementation 'org.webjars:stomp-websocket:2.3.4'
-
-    // JSON
-    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
-
-    // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
