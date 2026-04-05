@@ -37,7 +37,7 @@ dependencies {
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
     // AWS (Spring Boot 3 호환 버전)
-//    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
