@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.util.SerializationUtils;
 
 import java.util.Base64;
+import java.util.Optional;
 
 public class CookieUtil {
     // 요청값(이름, 값, 만료 기간)을 바탕으로 클라이언트 브라우저에 새로운 쿠키 추가
@@ -31,6 +32,21 @@ public class CookieUtil {
                 response.addCookie(cookie);
             }
         }
+    }
+
+    // 쿠키 이름을 입력받아 쿠키 객체를 반환
+    public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null && cookies.length > 0) {
+            for (Cookie cookie : cookies) {
+                if (name.equals(cookie.getName())) {
+                    return Optional.of(cookie);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     // 객체를 직렬화해 쿠키의 값으로 변환
