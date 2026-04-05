@@ -1,6 +1,7 @@
 package org.makery.config;
 
 import lombok.RequiredArgsConstructor;
+import org.makery.config.oauth.OAuth2LogoutHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -63,7 +64,6 @@ public class WebOAuthSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
@@ -77,6 +77,13 @@ public class WebOAuthSecurityConfig {
                         )
                         .successHandler(oAuth2SuccessHandler())
                         .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserCustomService))
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/api/logout")
+                        .addLogoutHandler(oAuth2LogoutHandler()) // 아래에서 만든 빈을 등록
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpStatus.OK.value());
+                        })
                 )
                 .exceptionHandling(exceptions ->
                         exceptions.defaultAuthenticationEntryPointFor(
@@ -95,6 +102,11 @@ public class WebOAuthSecurityConfig {
                 oAuth2AuthorizationRequestBasedOnCookieRepository(),
                 userService
         );
+    }
+
+    @Bean
+    public OAuth2LogoutHandler oAuth2LogoutHandler() {
+        return new OAuth2LogoutHandler(refreshTokenRepository);
     }
 
     @Bean
