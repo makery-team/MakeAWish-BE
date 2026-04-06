@@ -22,6 +22,6 @@ public class ChatMessageResponseDto {
         this.message = chatMessage.getMessage();
         this.imageUrl = chatMessage.getImageUrl();
         this.roomNumber = chatMessage.getRoomNumber();
-        this.createdTime = chatMessage.getCreatedTime();
+        this.createdTime = chatMessage.getCreatedAt();
     }
 }
