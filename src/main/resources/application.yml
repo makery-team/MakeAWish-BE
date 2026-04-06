@@ -1,29 +1,45 @@
 spring:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
   jpa:
-    hibernate:
-      ddl-auto: create-drop
     show-sql: true
-    # 💡 Hibernate가 테이블을 다 만든 뒤에 SQL을 실행하게 순서를 늦춥니다.
-    defer-datasource-initialization: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
-        # 💡 Hibernate 6에서 JSON 타입을 문자열로 강제 변환합니다.
-        type:
-          json_format: STRING
+    hibernate:
+      ddl-auto: create # update, create
+    defer-datasource-initialization: true
 
-  sql:
-    init:
-      mode: always
-      # 💡 혹시 지울 테이블이 없어도 에러 내지 말고 넘어가게 합니다.
-      continue-on-error: true
+  #  로컬 테스트용
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2  # 서울 리전
+        auto: false            # 로컬 환경이므로 자동 감지 비활성화
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      s3:
+        enabled: false
+
+  # oauth2 설정
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+  h2:
+    console:
+      enabled: true
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret_key: ${JWT_SECRET_KEY}

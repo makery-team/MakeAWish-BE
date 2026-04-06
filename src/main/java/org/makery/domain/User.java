@@ -1,9 +1,8 @@
 package org.makery.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -12,33 +11,50 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @NotNull
+    @Column(unique = true)
     private String email;
 
-    // ⬇️ 이 필드를 추가했습니다!
-    @Column(nullable = false)
-    private String password;
+    @NotNull
+    private String name; // 소셜 계정 이름
 
-    private String nickname;
+    @Column(unique = true)
+    private String nickname; // 서비스 내 활동 닉네임
 
-    private String phone;
+    private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role; // BUYER(구매자), SELLER(사장님)
+    private Language language; // 주 사용 언어
 
-    private String provider; // KAKAO, GOOGLE, LOCAL 등
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
 
-    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
-    private Store store;
+    @Enumerated(EnumType.STRING)
+    private OAuthProvider oAuthProvider;
 
-    public enum UserRole {
-        BUYER, SELLER
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private SellerProfile sellerProfile; // 판매자 프로필
+
+    /**
+     * 소셜 계정의 최신 이름 정보를 동기화
+     */
+    public User update(String name) {
+        this.name = name;
+        return this;
+    }
+
+    /**
+     * 소셜 가입 직후 필수 프로필 설정
+     */
+    public void updateProfile(String nickname, String phoneNumber, Language language) {
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.language = language;
     }
 }

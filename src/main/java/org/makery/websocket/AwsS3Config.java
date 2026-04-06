@@ -1,0 +1,39 @@
+//package org.makery.websocket;
+//
+//import com.amazonaws.auth.AWSStaticCredentialsProvider;
+//import com.amazonaws.auth.BasicAWSCredentials;
+//import com.amazonaws.services.s3.AmazonS3;
+//import com.amazonaws.services.s3.AmazonS3Client;
+//import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+//import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//
+//@Configuration
+//public class AwsS3Config {
+//
+//    @Value("${cloud.aws.credentials.access-key}") // application.yml 에 명시한 내용
+//    private String accessKey;
+//
+//    @Value("${cloud.aws.credentials.secret-key}")
+//    private String secretKey;
+//
+//    @Value("${cloud.aws.region.static}")
+//    private String region;
+//
+//    @Bean
+//    public AmazonS3 amazonS3() {
+//        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
+//        return (AmazonS3Client) AmazonS3ClientBuilder.standard()
+//                .withRegion(region)
+//                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+//                .build();
+//    }
+//
+////    @Bean
+////    public S3Client s3Client() {
+////        return S3Client.builder()
+////                .region(Region.US_EAST_1) // AWS 리전: 미국 (버지니아 북부)
+////                .build();
+////    }
+//}
