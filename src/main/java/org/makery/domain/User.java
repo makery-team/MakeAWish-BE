@@ -22,13 +22,15 @@ public class User extends BaseEntity {
     private String email;
 
     @NotNull
-    private String name;
+    private String name; // 소셜 계정 이름
 
-    // 소셜 로그인 시 번호를 못 가져올 수 있으므로 NotNull 해제 권장
+    @Column(unique = true)
+    private String nickname; // 서비스 내 활동 닉네임
+
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    private Language language;
+    private Language language; // 주 사용 언어
 
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
@@ -37,20 +39,22 @@ public class User extends BaseEntity {
     private OAuthProvider oAuthProvider;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private SellerProfile sellerProfile;
+    private SellerProfile sellerProfile; // 판매자 프로필
 
-    // --- 비즈니스 로직 ---
-
-    // 1. 단순 이름 업데이트 (OAuth2UserCustomService용)
+    /**
+     * 소셜 계정의 최신 이름 정보를 동기화
+     */
     public User update(String name) {
         this.name = name;
         return this;
     }
 
-    // 2. 이름과 언어 업데이트 (UserService용)
-    public User update(String name, Language language) {
-        this.name = name;
+    /**
+     * 소셜 가입 직후 필수 프로필 설정
+     */
+    public void updateProfile(String nickname, String phoneNumber, Language language) {
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
         this.language = language;
-        return this;
     }
 }
