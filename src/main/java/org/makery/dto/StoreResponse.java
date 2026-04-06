@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.makery.domain.Store;
 import java.util.List; // 💡 List 사용을 위해 추가
+import java.util.Map;
 import java.util.stream.Collectors; // 💡 변환을 위해 추가
 
 @Getter
@@ -19,7 +20,7 @@ public class StoreResponse {
     private Integer reviewCount;
     private Double latitude;
     private Double longitude;
-    private String orderSchema;
+    private Map<String, Object> orderSchema;
 
     // 💡 상세 조회 시 함께 보여줄 포트폴리오 리스트 추가!
     private List<PortfolioResponse> portfolios;

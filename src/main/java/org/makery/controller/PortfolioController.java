@@ -1,11 +1,13 @@
 package org.makery.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.makery.domain.Tag;
 import org.makery.dto.InpaintingRequest;
 import org.makery.dto.InpaintingResponse;
 import org.makery.dto.PortfolioResponse;
 import org.makery.service.InpaintingService;
 import org.makery.service.PortfolioService;
+import org.makery.service.TagService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/portfolios")
@@ -20,6 +23,7 @@ import java.util.List;
 public class PortfolioController {
 
     private final PortfolioService portfolioService;
+    private final TagService tagService;
     private final InpaintingService inpaintingService;
 
     /**
@@ -27,13 +31,18 @@ public class PortfolioController {
      * GET /api/portfolios?query=...&tags=...
      */
     @GetMapping
-    public ResponseEntity<List<PortfolioResponse>> getPortfolios(
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) String tags,
-            @RequestParam(defaultValue = "latest") String sort,
-            @PageableDefault(size = 10) Pageable pageable
-    ) {
-        List<PortfolioResponse> results = portfolioService.search(query, tags, sort, pageable);
+    public ResponseEntity<List<PortfolioResponse>> getPortfolios(@RequestParam(required = false) String tags,
+                                                                 @RequestParam(defaultValue = "latest") String sort,
+                                                                 @PageableDefault(size = 10) Pageable pageable) {
+
+        Set<Tag> tagEntities = null;
+        if (tags != null && !tags.isBlank()) {
+            Set<String> tagNames = Set.of(tags.split(","));
+            tagEntities = tagService.findByNames(tagNames);
+        }
+
+        List<PortfolioResponse> results = portfolioService.search(tagEntities, sort, pageable);
+
         return ResponseEntity.ok(results);
     }
 

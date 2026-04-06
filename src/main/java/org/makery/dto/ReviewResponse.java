@@ -19,7 +19,7 @@ public class ReviewResponse {
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()
                 .id(review.getId())
-                .nickname(review.getUser().getNickname()) // 작성자 정보에서 닉네임 가져오기
+                .nickname(review.getOrder().getUser().getNickname()) // 작성자 정보에서 닉네임 가져오기
                 .content(review.getContent())
                 .rating(review.getRating())
                 .createdAt(review.getCreatedAt())
