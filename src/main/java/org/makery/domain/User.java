@@ -21,6 +21,8 @@ public class User extends BaseEntity {
     @Column(unique = true)
     private String email;
 
+    private String password;
+
     @NotNull
     private String name; // 소셜 계정 이름
 
