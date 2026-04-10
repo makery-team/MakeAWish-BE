@@ -40,9 +40,14 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "store_id")
     private Store store;
 
+    @Singular
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> items = new ArrayList<>();
+    private List<OrderItem> items;
 
     @OneToOne(mappedBy = "order")
     private Payment payment;
+
+    public void updateStatus(OrderStatus newStatus) {
+        this.status = newStatus;
+    }
 }
