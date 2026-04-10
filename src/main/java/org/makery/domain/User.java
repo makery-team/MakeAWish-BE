@@ -21,10 +21,11 @@ public class User extends BaseEntity {
     @Column(unique = true)
     private String email;
 
+    private String password;
+
     @NotNull
     private String name;
 
-    // 소셜 로그인 시 번호를 못 가져올 수 있으므로 NotNull 해제 권장
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
