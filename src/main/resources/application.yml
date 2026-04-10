@@ -7,10 +7,22 @@ spring:
     hibernate:
       ddl-auto: create # update, create
     defer-datasource-initialization: true
+
   #  로컬 테스트용
   datasource:
     url: jdbc:h2:mem:testdb
     username: sa
+
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2  # 서울 리전
+        auto: false            # 로컬 환경이므로 자동 감지 비활성화
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      s3:
+        enabled: false
 
   # oauth2 설정
   security:
@@ -27,3 +39,7 @@ spring:
   h2:
     console:
       enabled: true
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret_key: ${JWT_SECRET_KEY}
