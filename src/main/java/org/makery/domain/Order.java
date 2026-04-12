@@ -2,10 +2,12 @@ package org.makery.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -25,12 +27,13 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    private LocalDate pickupDate;
+    private LocalDateTime pickupDate;
 
     private int totalPrice;
 
-    @Column(columnDefinition = "TEXT")
-    private String orderData;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    private Map<String, Object> orderData;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -47,7 +50,16 @@ public class Order extends BaseEntity {
     @OneToOne(mappedBy = "order")
     private Payment payment;
 
+    public void calculateTotalPrice() {
+        this.totalPrice = items.stream()
+                .mapToInt(item -> item.getUnitPrice() * item.getQuantity())
+                .sum();
+    }
+
     public void updateStatus(OrderStatus newStatus) {
+        if (this.status == OrderStatus.COMPLETED || this.status == OrderStatus.CANCELED) {
+            throw new IllegalStateException("이미 종료된 주문은 상태를 변경할 수 없습니다.");
+        }
         this.status = newStatus;
     }
 }

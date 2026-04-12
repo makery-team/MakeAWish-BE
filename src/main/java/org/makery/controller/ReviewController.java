@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api") // 💡 기본 경로를 /api로 설정
+@RequestMapping("/api") // 기본 경로를 /api로 설정
 @RequiredArgsConstructor
 public class ReviewController {
 

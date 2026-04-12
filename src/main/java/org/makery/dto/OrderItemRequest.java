@@ -1,7 +1,6 @@
 package org.makery.dto;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record OrderItemRequest(
@@ -12,6 +11,5 @@ public record OrderItemRequest(
         int quantity,
 
         // 사용자가 AI를 통해 생성한 커스텀 케이크 이미지 URL
-        @NotBlank(message = "커스텀 이미지 경로는 필수입니다.")
         String customizedImageUrl
 ) {}

@@ -84,4 +84,14 @@ public class Store extends BaseEntity {
     public void updateOrderSchema(Map<String, Object> newSchema) {
         this.orderSchema = newSchema;
     }
+
+    public void addReview(int newRating) {
+        // 1. 새로운 평균 평점 계산
+        double totalRatingScore = (this.rating * this.reviewCount) + newRating;
+        this.reviewCount++;
+        this.rating = totalRatingScore / this.reviewCount;
+
+        // 소수점 첫째 자리까지만 유지하고 싶다면 아래 로직 추가
+        this.rating = Math.round(this.rating * 10) / 10.0;
+    }
 }

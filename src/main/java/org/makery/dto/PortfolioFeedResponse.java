@@ -7,20 +7,22 @@ import org.makery.domain.Tag;
 import java.util.List;
 
 @Builder
-public record PortfolioResponse(
+public record PortfolioFeedResponse(
         Long id,
         String imageUrl,
+        String storeName,
         List<String> tags,
-        boolean isInpaintingAllowed,
-        int likeCount
+        int likeCount,
+        boolean isInpaintingAllowed
 ) {
-    public static PortfolioResponse from(Portfolio portfolio) {
-        return PortfolioResponse.builder()
+    public static PortfolioFeedResponse from(Portfolio portfolio) {
+        return PortfolioFeedResponse.builder()
                 .id(portfolio.getId())
                 .imageUrl(portfolio.getImageUrl())
+                .storeName(portfolio.getStore().getName())
                 .tags(portfolio.getTags().stream().map(Tag::getName).toList())
-                .isInpaintingAllowed(portfolio.isInpaintingAllowed())
                 .likeCount(portfolio.getLikeCount())
+                .isInpaintingAllowed(portfolio.isInpaintingAllowed())
                 .build();
     }
 }

@@ -4,32 +4,24 @@ import org.makery.domain.Order;
 import org.makery.domain.OrderStatus;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
-public record OrderDetailResponse(
+public record OrderSummaryResponse(
         Long id,
         String orderNumber,
         String storeName,
         OrderStatus status,
-        LocalDateTime pickupDate,
         int totalPrice,
-        Map<String, Object> orderData,
-        List<OrderItemResponse> items,
+        LocalDateTime pickupDate,
         LocalDateTime createdAt
 ) {
-    public static OrderDetailResponse from(Order order) {
-        return new OrderDetailResponse(
+    public static OrderSummaryResponse from(Order order) {
+        return new OrderSummaryResponse(
                 order.getId(),
                 order.getOrderNumber(),
                 order.getStore().getName(),
                 order.getStatus(),
-                order.getPickupDate(),
                 order.getTotalPrice(),
-                order.getOrderData(),
-                order.getItems().stream()
-                        .map(OrderItemResponse::from)
-                        .toList(),
+                order.getPickupDate(),
                 order.getCreatedAt()
         );
     }
