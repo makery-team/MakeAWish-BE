@@ -3,10 +3,12 @@ package org.makery.service;
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.Portfolio;
 import org.makery.domain.Tag;
+import org.makery.dto.PortfolioFeedResponse;
 import org.makery.dto.PortfolioResponse;
 import org.makery.repository.PortfolioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,5 +54,26 @@ public class PortfolioService {
         // 2. 포트폴리오의 태그 세트가 검색 조건의 태그 세트를 모두 포함하는지 확인
         // Set 타입끼리는 containsAll 메서드를 통해 한 번에 비교가 가능합니다.
         return portfolioTags != null && portfolioTags.containsAll(searchTags);
+    }
+
+    /**
+     * 최신순 피드 조회
+     */
+    public Slice<PortfolioFeedResponse> getFeed(Pageable pageable) {
+        return portfolioRepository.findAllByOrderByCreatedAtDesc(pageable)
+                .map(PortfolioFeedResponse::from); // Portfolio -> PortfolioFeedResponse 변환
+    }
+
+    /**
+     * 태그 기반 피드 조회
+     */
+    public Slice<PortfolioFeedResponse> searchFeedByTags(List<String> tags, Pageable pageable) {
+        if (tags == null || tags.isEmpty()) {
+            return getFeed(pageable); // 태그가 없으면 기본 피드 반환
+        }
+
+        Long tagCount = (long) tags.size();
+        return portfolioRepository.findByTags(tags, tagCount, pageable)
+                .map(PortfolioFeedResponse::from);
     }
 }

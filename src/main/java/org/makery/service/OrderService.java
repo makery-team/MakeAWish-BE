@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.makery.domain.*;
 import org.makery.dto.OrderDetailResponse;
 import org.makery.dto.OrderItemRequest;
-import org.makery.dto.OrderItemResponse;
-import org.makery.dto.OrderRequest;
+import org.makery.dto.OrderCreateRequest;
+import org.makery.dto.OrderSummaryResponse;
 import org.makery.repository.OrderRepository;
 import org.makery.repository.ProductRepository;
 import org.makery.repository.StoreRepository;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,22 +28,21 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     /**
-     * 주문 생성 로직
+     * 주문 생성
      */
     @Transactional
-    public Long createOrder(Long userId, OrderRequest req) {
-        // 1. 주문자(User)와 매장(Store) 정보 조회
+    public Long createOrder(Long userId, OrderCreateRequest req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
         Store store = storeRepository.findById(req.storeId())
                 .orElseThrow(() -> new IllegalArgumentException("매장을 찾을 수 없습니다."));
 
-        // 2. 주문 객체 초기 생성 (빌더 패턴)
         Order order = Order.builder()
                 .user(user)
                 .store(store)
-                .orderNumber(generateOrderNumber()) // 고유 주문번호 생성
-                .status(OrderStatus.PENDING_QUOTE)        // 초기 상태: 대기
+                .orderNumber(generateOrderNumber())
+                .status(OrderStatus.PENDING_QUOTE)
                 .pickupDate(req.pickupDate())
                 .orderData(req.orderData())
                 .items(new ArrayList<>())
@@ -50,31 +50,26 @@ public class OrderService {
 
         int calculatedTotalPrice = 0;
 
-        // 3. 주문 상품(OrderItem) 리스트 생성 및 연관관계 설정
         for (OrderItemRequest itemReq : req.items()) {
             Product product = productRepository.findById(itemReq.productId())
                     .orElseThrow(() -> new IllegalArgumentException("상품 정보를 찾을 수 없습니다."));
 
-            // 상품의 현재 이름과 가격을 OrderItem에 스냅샷으로 저장
             OrderItem orderItem = OrderItem.builder()
                     .product(product)
                     .name(product.getName())
                     .unitPrice(product.getPrice())
                     .quantity(itemReq.quantity())
                     .customizedImageUrl(itemReq.customizedImageUrl())
-                    .order(order) // 양방향 연관관계 설정
+                    .order(order)
                     .build();
 
             order.getItems().add(orderItem);
 
-            // 총 금액 누적 계산
             calculatedTotalPrice += orderItem.getUnitPrice() * orderItem.getQuantity();
         }
 
-        // 4. 합산된 총 금액 설정
         order.setTotalPrice(calculatedTotalPrice);
 
-        // 5. DB 저장 (CascadeType.ALL 설정 덕분에 OrderItem도 함께 저장됨)
         return orderRepository.save(order).getId();
     }
 
@@ -110,6 +105,9 @@ public class OrderService {
                 + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
+    /**
+     * 주문 상태 변경
+     */
     @Transactional
     public void updateOrderStatus(Long orderId, Long userId, OrderStatus newStatus) {
         // 1. 주문 조회
@@ -126,5 +124,24 @@ public class OrderService {
 
         // 3. 상태 업데이트
         order.updateStatus(newStatus);
+    }
+
+    /**
+     * 내 주문 목록 조회 (역할에 따른 분기)
+     */
+    public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role) {
+        List<Order> orders;
+
+        if (role == UserRole.ROLE_SELLER) {
+            // 사장님인 경우: 매장으로 들어온 주문들 조회
+            orders = orderRepository.findAllByStoreSellerProfileUserIdOrderByCreatedAtDesc(userId);
+        } else {
+            // 일반 유저인 경우: 본인이 주문한 내역 조회
+            orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        }
+
+        return orders.stream()
+                .map(OrderSummaryResponse::from)
+                .toList();
     }
 }

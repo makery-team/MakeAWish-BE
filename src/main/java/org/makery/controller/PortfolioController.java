@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.makery.domain.Tag;
 import org.makery.dto.InpaintingRequest;
 import org.makery.dto.InpaintingResponse;
+import org.makery.dto.PortfolioFeedResponse;
 import org.makery.dto.PortfolioResponse;
 import org.makery.service.InpaintingService;
 import org.makery.service.PortfolioService;
 import org.makery.service.TagService;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,5 +75,26 @@ public class PortfolioController {
     ) {
         InpaintingResponse response = inpaintingService.getInpaintingDetail(portfolioId, inpaintingId);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 최신순 피드 조회 API
+     * 예: /api/portfolios/feed?page=0&size=12
+     */
+    @GetMapping("/feed")
+    public ResponseEntity<Slice<PortfolioFeedResponse>> getPortfolioFeed(
+            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(portfolioService.getFeed(pageable));
+    }
+
+    /**
+     * 태그 기반 피드 조회 API
+     * 예: /api/portfolios/search?tags=생일,레터링,초코
+     */
+    @GetMapping("/search")
+    public ResponseEntity<Slice<PortfolioFeedResponse>> searchFeedByTags(
+            @RequestParam(required = false) List<String> tags,
+            @PageableDefault(size = 12) Pageable pageable) {
+        return ResponseEntity.ok(portfolioService.searchFeedByTags(tags, pageable));
     }
 }
