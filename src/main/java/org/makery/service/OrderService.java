@@ -2,20 +2,18 @@ package org.makery.service;
 
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.*;
+import org.makery.dto.OrderCreateRequest;
 import org.makery.dto.OrderDetailResponse;
 import org.makery.dto.OrderItemRequest;
-import org.makery.dto.OrderCreateRequest;
 import org.makery.dto.OrderSummaryResponse;
-import org.makery.repository.OrderRepository;
-import org.makery.repository.ProductRepository;
-import org.makery.repository.StoreRepository;
-import org.makery.repository.UserRepository;
+import org.makery.repository.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -26,6 +24,7 @@ public class OrderService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final PortfolioRepository portfolioRepository; // 💡 추가됨
 
     /**
      * 주문 생성
@@ -38,6 +37,7 @@ public class OrderService {
         Store store = storeRepository.findById(req.storeId())
                 .orElseThrow(() -> new IllegalArgumentException("매장을 찾을 수 없습니다."));
 
+        // 💡 1. 초기 주문 객체 생성 (기존 store.getOrderSchema() 호출 제거)
         Order order = Order.builder()
                 .user(user)
                 .store(store)
@@ -51,11 +51,23 @@ public class OrderService {
         int calculatedTotalPrice = 0;
 
         for (OrderItemRequest itemReq : req.items()) {
+            // 💡 2. 상품(카테고리) 정보 조회
             Product product = productRepository.findById(itemReq.productId())
                     .orElseThrow(() -> new IllegalArgumentException("상품 정보를 찾을 수 없습니다."));
 
+            // 💡 3. 핵심 변경: 이제 Product(카테고리) 레벨의 스키마로 검증합니다.
+            validateOrderData(product.getOrderSchema(), req.orderData());
+
+            // 💡 4. 사용자가 선택한 디자인(Portfolio) 정보 연결
+            Portfolio portfolio = null;
+            if (itemReq.portfolioId() != null) {
+                portfolio = portfolioRepository.findById(itemReq.portfolioId())
+                        .orElseThrow(() -> new IllegalArgumentException("디자인 정보를 찾을 수 없습니다."));
+            }
+
             OrderItem orderItem = OrderItem.builder()
                     .product(product)
+                    .portfolio(portfolio) // 💡 Portfolio 참조 추가
                     .name(product.getName())
                     .unitPrice(product.getPrice())
                     .quantity(itemReq.quantity())
@@ -64,13 +76,41 @@ public class OrderService {
                     .build();
 
             order.getItems().add(orderItem);
-
             calculatedTotalPrice += orderItem.getUnitPrice() * orderItem.getQuantity();
         }
 
         order.setTotalPrice(calculatedTotalPrice);
 
         return orderRepository.save(order).getId();
+    }
+
+    /**
+     * 주문 데이터 검증 로직
+     */
+    private void validateOrderData(Map<String, Object> schema, Map<String, Object> orderData) {
+        if (schema == null || !schema.containsKey("templates")) return;
+
+        if (schema.get("templates") instanceof List<?> templates) {
+            for (Object item : templates) {
+                if (item instanceof Map<?, ?> field) {
+                    if (!(field.get("name") instanceof String name)) continue;
+
+                    Object reqObj = field.get("required");
+                    boolean isRequired = reqObj instanceof Boolean b && b;
+
+                    if (isRequired) {
+                        Object labelObj = field.get("label");
+                        String label = (labelObj instanceof String l) ? l : name;
+
+                        if (orderData == null || !orderData.containsKey(name) ||
+                                orderData.get(name) == null || orderData.get(name).toString().trim().isEmpty()) {
+
+                            throw new IllegalArgumentException(label + " 항목은 필수 입력 사항입니다.");
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -81,14 +121,11 @@ public class OrderService {
         Order order = orderRepository.findDetailById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문 내역을 찾을 수 없습니다."));
 
-        // 본인 확인 로직
         if (role == UserRole.ROLE_USER) {
-            // 구매자라면: 주문서의 주인 ID와 현재 로그인한 유저 ID가 같은지 확인
             if (!order.getUser().getId().equals(currentUserId)) {
                 throw new AccessDeniedException("본인의 주문만 조회할 수 있습니다.");
             }
         } else if (role == UserRole.ROLE_SELLER) {
-            // 사장님이라면: 주문이 들어온 매장의 주인이 현재 유저인지 확인
             if (!order.getStore().getSellerProfile().getUser().getId().equals(currentUserId)) {
                 throw new AccessDeniedException("본인 매장의 주문만 조회할 수 있습니다.");
             }
@@ -98,7 +135,7 @@ public class OrderService {
     }
 
     /**
-     * 비즈니스 로직: 고유 주문번호 생성 (날짜-랜덤문자 조합)
+     * 고유 주문번호 생성 (날짜-랜덤문자 조합)
      */
     private String generateOrderNumber() {
         return java.time.LocalDate.now().toString().replace("-", "")
@@ -110,33 +147,27 @@ public class OrderService {
      */
     @Transactional
     public void updateOrderStatus(Long orderId, Long userId, OrderStatus newStatus) {
-        // 1. 주문 조회
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
 
-        // 2. 권한 검증: 현재 로그인한 사장님이 이 매장의 주인이 맞는지 확인
-        // store -> sellerProfile -> user 구조를 따라가서 ID를 비교합니다.
         Long storeOwnerId = order.getStore().getSellerProfile().getUser().getId();
 
         if (!storeOwnerId.equals(userId)) {
             throw new RuntimeException("본인 매장의 주문 상태만 변경할 수 있습니다.");
         }
 
-        // 3. 상태 업데이트
         order.updateStatus(newStatus);
     }
 
     /**
-     * 내 주문 목록 조회 (역할에 따른 분기)
+     * 주문 목록 조회
      */
     public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role) {
         List<Order> orders;
 
         if (role == UserRole.ROLE_SELLER) {
-            // 사장님인 경우: 매장으로 들어온 주문들 조회
             orders = orderRepository.findAllByStoreSellerProfileUserIdOrderByCreatedAtDesc(userId);
         } else {
-            // 일반 유저인 경우: 본인이 주문한 내역 조회
             orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
         }
 

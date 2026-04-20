@@ -2,7 +2,6 @@ package org.makery.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,6 +26,18 @@ public class Portfolio extends BaseEntity {
     @Column(nullable = false)
     private String imageUrl;
 
+    /**
+     * 핵심 수정: 이 디자인 샘플이 속한 상위 제품군(카테고리)
+     * 예: 이 티니핑 사진은 '도시락 케이크' 카테고리에 속함
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private Store store;
+
     @ManyToMany
     @JoinTable(
             name = "portfolio_tags",
@@ -42,35 +53,8 @@ public class Portfolio extends BaseEntity {
     @Builder.Default
     private int likeCount = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id")
-    private Store store;
-
     public void updateInpaintingAndTags(boolean isInpaintingAllowed, Set<Tag> tags) {
         this.isInpaintingAllowed = isInpaintingAllowed;
         this.tags = tags;
-    }
-
-    public void addTag(Tag tag) {
-        if (this.tags == null) {
-            this.tags = new HashSet<>();
-        }
-
-        boolean isExist = this.tags.stream()
-                .anyMatch(t -> t.getName().equals(tag.getName()));
-
-        if (!isExist) {
-            this.tags.add(tag);
-        }
-    }
-
-    public void increaseLikeCount() {
-        this.likeCount++;
-    }
-
-    public void decreaseLikeCount() {
-        if (this.likeCount > 0) {
-            this.likeCount--;
-        }
     }
 }

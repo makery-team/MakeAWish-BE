@@ -4,9 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.makery.domain.Store;
-import java.util.List; // 💡 List 사용을 위해 추가
-import java.util.Map;
-import java.util.stream.Collectors; // 💡 변환을 위해 추가
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
@@ -16,14 +15,15 @@ public class StoreResponse {
     private String name;
     private String description;
     private String hours;
+    private String notice;
+    private String cautionNotice; // 💡 추가된 매장 공통 주의사항
     private Double rating;
     private Integer reviewCount;
     private Double latitude;
     private Double longitude;
-    private Map<String, Object> orderSchema;
 
-    // 💡 상세 조회 시 함께 보여줄 포트폴리오 리스트 추가!
-    private List<PortfolioResponse> portfolios;
+    // 💡 핵심 수정: 매장 직속 포트폴리오가 아니라, '카테고리(Product)' 리스트를 내려줍니다.
+    private List<ProductResponse> categories;
 
     public static StoreResponse from(Store store) {
         return StoreResponse.builder()
@@ -31,14 +31,15 @@ public class StoreResponse {
                 .name(store.getName())
                 .description(store.getDescription())
                 .hours(store.getHours())
+                .notice(store.getNotice())
+                .cautionNotice(store.getCautionNotice())
                 .rating(store.getRating())
                 .reviewCount(store.getReviewCount())
                 .latitude(store.getLatitude())
                 .longitude(store.getLongitude())
-                .orderSchema(store.getOrderSchema())
-                // 💡 매장이 가지고 있는 Portfolio 엔티티들을 DTO로 변환해서 담아줍니다.
-                .portfolios(store.getPortfolios().stream()
-                        .map(PortfolioResponse::from)
+                // 💡 매장의 Product(카테고리)들을 DTO로 변환하여 담습니다.
+                .categories(store.getProducts().stream()
+                        .map(ProductResponse::from)
                         .collect(Collectors.toList()))
                 .build();
     }

@@ -39,7 +39,7 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
                 .orElseGet(() -> userRepository.save(User.builder() // 없으면 신규 가입
                         .email(email)
                         .name(name)
-                        .userRole(UserRole.ROLE_USER)
+                        .userRole(UserRole.ROLE_GUEST)
                         .oAuthProvider(OAuthProvider.GOOGLE)
                         .build()));
     }
