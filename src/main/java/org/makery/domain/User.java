@@ -59,4 +59,12 @@ public class User extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.language = language;
     }
+
+    /**
+     * 사용자의 권한을 변경하는 비즈니스 메서드
+     * (예: ROLE_GUEST -> ROLE_USER)
+     */
+    public void assignRole(UserRole userRole) {
+        this.userRole = userRole;
+    }
 }
