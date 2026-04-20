@@ -10,6 +10,8 @@ public record OrderItemRequest(
         @Min(value = 1, message = "수량은 최소 1개 이상이어야 합니다.")
         int quantity,
 
+        Long portfolioId,
+
         // 사용자가 AI를 통해 생성한 커스텀 케이크 이미지 URL
         String customizedImageUrl
 ) {}

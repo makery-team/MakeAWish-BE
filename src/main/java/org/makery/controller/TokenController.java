@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-public class TokenApiController {
+public class TokenController {
 
     private final TokenService tokenService;
 

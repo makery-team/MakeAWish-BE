@@ -11,7 +11,6 @@ import org.makery.service.PortfolioService;
 import org.makery.service.TagService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +65,6 @@ public class PortfolioController {
     /**
      * 3. 인페인팅 개별 결과 상세 조회 API
      * GET /api/portfolios/{portfolioId}/inpaintings/{inpaintingId}
-     * 💡 새로 추가된 메서드입니다!
      */
     @GetMapping("/{portfolioId}/inpaintings/{inpaintingId}")
     public ResponseEntity<InpaintingResponse> getInpaintingDetail(
@@ -75,16 +73,6 @@ public class PortfolioController {
     ) {
         InpaintingResponse response = inpaintingService.getInpaintingDetail(portfolioId, inpaintingId);
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 최신순 피드 조회 API
-     * 예: /api/portfolios/feed?page=0&size=12
-     */
-    @GetMapping("/feed")
-    public ResponseEntity<Slice<PortfolioFeedResponse>> getPortfolioFeed(
-            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(portfolioService.getFeed(pageable));
     }
 
     /**
