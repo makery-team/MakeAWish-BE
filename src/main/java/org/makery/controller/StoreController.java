@@ -2,7 +2,7 @@ package org.makery.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.Store;
-import org.makery.dto.OrderSchemaResponse; // 💡 추가됨!
+import org.makery.dto.OrderSchemaResponse;
 import org.makery.dto.PortfolioResponse;
 import org.makery.dto.StoreResponse;
 import org.makery.service.PortfolioService;
@@ -72,12 +72,11 @@ public class StoreController {
     }
 
     /**
-     * 4. 매장별 주문서 양식(스키마) 조회 API
+     * 매장별 주문서 양식(스키마) 조회 API
      * GET /api/stores/{storeId}/order-schema
-     * 💡 새로 추가된 메서드입니다!
      */
     @GetMapping("/stores/{storeId}/order-schema")
-    public ResponseEntity<OrderSchemaResponse> getOrderSchema(@PathVariable Long storeId) {
+    public ResponseEntity<OrderSchemaResponse> getOrderSchema(@PathVariable("storeId") Long storeId) {
         OrderSchemaResponse response = storeService.getOrderSchema(storeId);
         return ResponseEntity.ok(response);
     }
