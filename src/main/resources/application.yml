@@ -4,27 +4,37 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: create # update, create
+      ddl-auto: update
     defer-datasource-initialization: true
+    database: mysql
 
-  #  로컬 테스트용
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 500 에러 해결을 위해 h2 설정을 잠시 활성화하거나 구조를 맞춥니다
+  h2:
+    console:
+      enabled: true # false에서 true로 변경하여 Security와의 충돌 방지
+
+  sql:
+    init:
+      mode: never
 
   cloud:
     aws:
       region:
-        static: ap-northeast-2  # 서울 리전
-        auto: false            # 로컬 환경이므로 자동 감지 비활성화
+        static: ap-northeast-2
       credentials:
         access-key: ${AWS_ACCESS_KEY_ID}
         secret-key: ${AWS_SECRET_ACCESS_KEY}
       s3:
         enabled: false
 
-  # oauth2 설정
   security:
     oauth2:
       client:
@@ -35,10 +45,6 @@ spring:
             scope:
               - email
               - profile
-
-  h2:
-    console:
-      enabled: true
 
 jwt:
   issuer: ${JWT_ISSUER}

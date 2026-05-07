@@ -41,7 +41,7 @@ public class WebOAuthSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "http://Make-a-wish-env.eba-dvjn7a8x.ap-northeast-2.elasticbeanstalk.com"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Refresh-Token"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowCredentials(true);
@@ -68,10 +68,12 @@ public class WebOAuthSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/test/token").permitAll()
+                        .requestMatchers("/api/users/check-nickname/**").permitAll()
                         .requestMatchers("/api/token", "/api/auth/google").permitAll()
-                        .requestMatchers("/api/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()
-                        .requestMatchers("/chats/**").permitAll()
+                        .requestMatchers("/chatting/**").authenticated()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
