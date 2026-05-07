@@ -1,0 +1,78 @@
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create # update, create
+    defer-datasource-initialization: true
+
+  #    로컬 테스트용
+  #  datasource:
+  #    url: jdbc:h2:mem:testdb
+  #    username: sa
+  #  h2:
+  #    console:
+  #      enabled: true
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}          # EB 환경 변수에서 주입
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  h2:
+    console:
+      enabled: false                    # 서버 환경에서는 H2 비활성화
+
+  sql:
+    init:
+      mode: never
+
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2  # 서울 리전
+        auto: false            # 로컬 환경이므로 자동 감지 비활성화
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      s3:
+        enabled: false
+
+  # oauth2 설정
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret_key: ${JWT_SECRET_KEY}
+
+#cloud:
+#  aws:
+#    credentials:
+#      access-key: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY:default_value}
+#      secret-key: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY:default_value}
+#    region:
+#      static: ${CLOUD_AWS_REGION_STATIC:ap-northeast-2}
+#    s3:
+#      bucket: ${CLOUD_AWS_S3_BUCKET}
+
+cloud:
+  aws:
+    credentials:
+      access-key: mock-key
+      secret-key: mock-secret
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: mock-bucket
