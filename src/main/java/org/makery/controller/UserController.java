@@ -1,6 +1,7 @@
 package org.makery.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.PrincipalDetails;
 import org.makery.domain.User;
@@ -8,8 +9,10 @@ import org.makery.dto.*;
 import org.makery.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Validated
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -38,7 +41,7 @@ public class UserController {
      */
     @GetMapping("/check-nickname")
     public ResponseEntity<NicknameCheckResponse> checkNickname(
-            @RequestParam("nickname") String nickname) {
+            @RequestParam("nickname") @NotBlank(message = "닉네임을 입력해주세요.") String nickname) {
 
         boolean isDuplicate = userService.isNicknameDuplicate(nickname);
 
