@@ -6,7 +6,7 @@ import org.makery.dto.InpaintingRequest;
 import org.makery.dto.InpaintingResponse;
 import org.makery.dto.PortfolioFeedResponse;
 import org.makery.dto.PortfolioResponse;
-import org.makery.service.InpaintingService;
+import org.makery.service.AiInpaintedDesignService;
 import org.makery.service.PortfolioService;
 import org.makery.service.TagService;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +26,7 @@ public class PortfolioController {
 
     private final PortfolioService portfolioService;
     private final TagService tagService;
-    private final InpaintingService inpaintingService;
+    private final AiInpaintedDesignService inpaintingService;
 
     /**
      * 1. 포트폴리오 검색 조회
@@ -79,9 +79,9 @@ public class PortfolioController {
      * 태그 기반 피드 조회 API
      * 예: /api/portfolios/search?tags=생일,레터링,초코
      */
-    @GetMapping("/search")
+    @GetMapping("/feeds")
     public ResponseEntity<Slice<PortfolioFeedResponse>> searchFeedByTags(
-            @RequestParam(required = false) List<String> tags,
+            @RequestParam(name = "tags", required = false) List<String> tags,
             @PageableDefault(size = 12) Pageable pageable) {
         return ResponseEntity.ok(portfolioService.searchFeedByTags(tags, pageable));
     }

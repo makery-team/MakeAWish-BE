@@ -2,6 +2,7 @@ package org.makery.config;
 
 import lombok.RequiredArgsConstructor;
 import org.makery.config.oauth.OAuth2LogoutHandler;
+import org.makery.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -37,6 +38,7 @@ public class WebOAuthSecurityConfig {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -58,6 +60,12 @@ public class WebOAuthSecurityConfig {
                 .requestMatchers("/img/**", "/css/**", "/js/**");
     }
 
+    // 삭제 필요
+    @Bean
+    public MasterKeyFilter masterKeyFilter() {
+        return new MasterKeyFilter(userRepository); // UserRepository 주입 필요
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -66,12 +74,16 @@ public class WebOAuthSecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // 삭제 필요
+                .addFilterBefore(masterKeyFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/test/token").permitAll()
+                        .requestMatchers("/api/users/check-nickname/**").permitAll()
                         .requestMatchers("/api/token", "/api/auth/google").permitAll()
-                        .requestMatchers("/api/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()
-                        .requestMatchers("/chats/**").permitAll()
+                        .requestMatchers("/chatting/**").authenticated()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
