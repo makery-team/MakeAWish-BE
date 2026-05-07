@@ -76,10 +76,8 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public boolean isNicknameDuplicate(String nickname) {
-        if (nickname == null || nickname.trim().isEmpty()) {
-            throw new IllegalArgumentException("닉네임을 입력해주세요.");
-        }
-        return userRepository.existsByNickname(nickname);
+
+        return userRepository.existsByNickname(nickname.trim());
     }
 
     @Transactional

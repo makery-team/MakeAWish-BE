@@ -29,4 +29,13 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     Slice<Portfolio> findByTags(@Param("tagNames") List<String> tagNames,
                                 @Param("tagCount") Long tagCount,
                                 Pageable pageable);
+
+    /**
+     * AI 에이전트 추천용: 태그 리스트에 포함된 포트폴리오를 중복 없이 조회
+     */
+    @Query("SELECT DISTINCT p FROM Portfolio p " +
+            "JOIN FETCH p.store s " +
+            "JOIN p.tags t " +
+            "WHERE t.name IN :tagNames")
+    List<Portfolio> findByTagNames(@Param("tagNames") List<String> tagNames);
 }

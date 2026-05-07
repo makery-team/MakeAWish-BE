@@ -6,6 +6,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +44,9 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "store_id")
     private Store store;
 
-    @Singular
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> items;
+    @Builder.Default
+    private List<OrderItem> items = new ArrayList<>();
 
     @OneToOne(mappedBy = "order")
     private Payment payment;
