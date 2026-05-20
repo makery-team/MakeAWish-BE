@@ -78,7 +78,7 @@ public class WebOAuthSecurityConfig {
                 .addFilterBefore(masterKeyFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/test/token").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/api/users/check-nickname/**").permitAll()
                         .requestMatchers("/api/token", "/api/auth/google").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()

@@ -24,7 +24,7 @@ public class OrderService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final PortfolioRepository portfolioRepository; // 💡 추가됨
+    private final PortfolioRepository portfolioRepository;
 
     /**
      * 주문 생성
@@ -37,7 +37,6 @@ public class OrderService {
         Store store = storeRepository.findById(req.storeId())
                 .orElseThrow(() -> new IllegalArgumentException("매장을 찾을 수 없습니다."));
 
-        // 💡 1. 초기 주문 객체 생성 (기존 store.getOrderSchema() 호출 제거)
         Order order = Order.builder()
                 .user(user)
                 .store(store)
@@ -51,14 +50,11 @@ public class OrderService {
         int calculatedTotalPrice = 0;
 
         for (OrderItemRequest itemReq : req.items()) {
-            // 💡 2. 상품(카테고리) 정보 조회
             Product product = productRepository.findById(itemReq.productId())
                     .orElseThrow(() -> new IllegalArgumentException("상품 정보를 찾을 수 없습니다."));
 
-            // 💡 3. 핵심 변경: 이제 Product(카테고리) 레벨의 스키마로 검증합니다.
             validateOrderData(product.getOrderSchema(), req.orderData());
 
-            // 💡 4. 사용자가 선택한 디자인(Portfolio) 정보 연결
             Portfolio portfolio = null;
             if (itemReq.portfolioId() != null) {
                 portfolio = portfolioRepository.findById(itemReq.portfolioId())
@@ -67,7 +63,7 @@ public class OrderService {
 
             OrderItem orderItem = OrderItem.builder()
                     .product(product)
-                    .portfolio(portfolio) // 💡 Portfolio 참조 추가
+                    .portfolio(portfolio)
                     .name(product.getName())
                     .unitPrice(product.getPrice())
                     .quantity(itemReq.quantity())
@@ -166,7 +162,8 @@ public class OrderService {
         List<Order> orders;
 
         if (role == UserRole.ROLE_SELLER) {
-            orders = orderRepository.findAllByStoreSellerProfileUserIdOrderByCreatedAtDesc(userId);
+            // 💡 [수정 완료] 터지던 메서드 대신 새로 만든 리포지토리의 @Query 메서드 호출
+            orders = orderRepository.findAllBySellerId(userId);
         } else {
             orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
         }
