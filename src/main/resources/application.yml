@@ -9,12 +9,12 @@ spring:
     defer-datasource-initialization: true
 
   # 로컬 테스트용
-  #  datasource:
-  #    url: jdbc:h2:mem:testdb
-  #    username: sa
-  #  h2:
-  #    console:
-  #      enabled: true
+#  datasource:
+#    url: jdbc:h2:mem:testdb
+#    username: sa
+#  h2:
+#    console:
+#      enabled: true
 
   # 서버 배포용
   datasource:
@@ -47,8 +47,10 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
+            client-id: ${GOOGLE_CLIENT_ID} # (이건 다른 API용으로 남겨두셔도 무방합니다)
             client-secret: ${GOOGLE_CLIENT_SECRET}
+            ios-client-id: ${GOOGLE_IOS_CLIENT_ID}
+            android-client-id: ${GOOGLE_ANDROID_CLIENT_ID}
             scope:
               - email
               - profile
