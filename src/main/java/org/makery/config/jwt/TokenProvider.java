@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.makery.domain.PrincipalDetails;
 import org.makery.domain.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -64,8 +65,24 @@ public class TokenProvider {
         Claims claims = getClaims(token);
         Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
 
+        // 1. 토큰에서 꺼낸 정보(ID, Email)로 우리 서비스의 User 객체를 임시 조립합니다.
+        User user = User.builder()
+                .id(claims.get("id", Long.class))
+                .email(claims.getSubject())
+                .build();
+
+        /* 만약 User 클래스에 @Builder가 없다면 위 코드를 지우고 아래 코드를 사용하세요.
+        User user = new User();
+        user.setId(claims.get("id", Long.class));
+        user.setEmail(claims.getSubject());
+        */
+
+        // 2. 컨트롤러가 기다리는 PrincipalDetails 명찰에 User를 넣어줍니다.
+        PrincipalDetails principalDetails = new PrincipalDetails(user);
+
+        // 3. PrincipalDetails를 시큐리티 토큰에 담아 반환합니다.
         return new UsernamePasswordAuthenticationToken(
-                new org.springframework.security.core.userdetails.User(claims.getSubject(), "", authorities),
+                principalDetails,
                 token,
                 authorities);
     }
