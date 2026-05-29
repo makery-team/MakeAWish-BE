@@ -1,9 +1,10 @@
 package org.makery.config.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.makery.domain.PrincipalDetails;
 import org.makery.domain.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,75 +13,85 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TokenProvider {
 
     private final JwtProperties jwtProperties;
 
-    // SecretKey 객체를 생성하는 헬퍼 메서드
     private SecretKey getSigningKey() {
-        byte[] keyBytes = jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8);
+        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.secretKey());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(User user, Duration expiredAt) {
-        Date now = new Date();
-        return makeToken(new Date(now.getTime() + expiredAt.toMillis()), user);
+    public String createAccessToken(User user) {
+        return makeToken(
+                new Date(System.currentTimeMillis() + jwtProperties.accessExpiration()),
+                user
+        );
+    }
+
+    public String createRefreshToken(User user) {
+        return makeToken(
+                new Date(System.currentTimeMillis() + jwtProperties.refreshExpiration()),
+                user
+        );
     }
 
     private String makeToken(Date expiry, User user) {
         Date now = new Date();
 
         return Jwts.builder()
-                .header().add("typ", "JWT").and() // 최신 스타일의 헤더 설정
-                .issuer(jwtProperties.getIssuer())
+                .header().add("typ", "JWT").and()
+                .issuer(jwtProperties.issuer())
                 .issuedAt(now)
                 .expiration(expiry)
                 .subject(user.getEmail())
                 .claim("id", user.getId())
-                .signWith(getSigningKey()) // SignatureAlgorithm 명시 없이 Key 객체 전달
+                .claim("role", user.getUserRole().name())
+                .signWith(getSigningKey())
                 .compact();
     }
 
     public boolean validToken(String token) {
         try {
             Jwts.parser()
-                    .verifyWith(getSigningKey()) // setSigningKey -> verifyWith
+                    .verifyWith(getSigningKey())
                     .build()
-                    .parseSignedClaims(token); // parseClaimsJws -> parseSignedClaims
+                    .parseSignedClaims(token);
             return true;
-        } catch (Exception e) {
-            return false;
+        } catch (SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 서명입니다.");
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            log.info("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT 토큰이 잘못되었습니다.");
         }
+        return false;
     }
 
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
 
-        // 1. 토큰에서 꺼낸 정보(ID, Email)로 우리 서비스의 User 객체를 임시 조립합니다.
+        String role = claims.get("role", String.class);
+        Set<SimpleGrantedAuthority> authorities = Collections.singleton(
+                new SimpleGrantedAuthority(role != null ? role : "ROLE_USER")
+        );
+
         User user = User.builder()
                 .id(claims.get("id", Long.class))
                 .email(claims.getSubject())
                 .build();
 
-        /* 만약 User 클래스에 @Builder가 없다면 위 코드를 지우고 아래 코드를 사용하세요.
-        User user = new User();
-        user.setId(claims.get("id", Long.class));
-        user.setEmail(claims.getSubject());
-        */
-
-        // 2. 컨트롤러가 기다리는 PrincipalDetails 명찰에 User를 넣어줍니다.
         PrincipalDetails principalDetails = new PrincipalDetails(user);
 
-        // 3. PrincipalDetails를 시큐리티 토큰에 담아 반환합니다.
         return new UsernamePasswordAuthenticationToken(
                 principalDetails,
                 token,
@@ -97,6 +108,6 @@ public class TokenProvider {
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload(); // getBody() -> getPayload()
+                .getPayload();
     }
 }

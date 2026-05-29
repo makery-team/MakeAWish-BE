@@ -21,51 +21,48 @@ ext {
 
 dependencies {
 
-    // Spring Boot Starters
+    // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
-    // Database
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    runtimeOnly 'com.h2database:h2'
-
-    // Env
-    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
-
-    // AWS (Spring Boot 3 호환 버전)
-//    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
+    // Google API
+    implementation 'com.google.api-client:google-api-client:2.2.0'
+    implementation 'com.google.guava:guava:33.2.1-jre'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-    // Websocket
+    // AWS S3
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.770'
+
+    // Database
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'com.h2database:h2'
+
+    // Environment
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+    // WebSocket
     implementation 'org.webjars:stomp-websocket:2.3.4'
+
+    // OpenFeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
-
-    implementation 'com.google.api-client:google-api-client:2.0.0'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.700'
 }
 
 dependencyManagement {
