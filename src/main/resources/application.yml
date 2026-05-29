@@ -24,47 +24,30 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   h2:
     console:
-      enabled: false                    # 서버 환경에서는 H2 비활성화
+      enabled: false
 
   sql:
     init:
       mode: always
 
-  cloud:
-    aws:
-      region:
-        static: ap-northeast-2  # 서울 리전
-        auto: false            # 로컬 환경이므로 자동 감지 비활성화
-      credentials:
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
-      s3:
-        enabled: false
-
-  # oauth2 설정
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID} # (이건 다른 API용으로 남겨두셔도 무방합니다)
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            ios-client-id: ${GOOGLE_IOS_CLIENT_ID}
-            android-client-id: ${GOOGLE_ANDROID_CLIENT_ID}
-            scope:
-              - email
-              - profile
-
+app:
+  auth:
+    google:
+      web-client-id: ${GOOGLE_CLIENT_ID}
 jwt:
   issuer: ${JWT_ISSUER}
-  secret_key: ${JWT_SECRET_KEY}
+  secret-key: ${JWT_SECRET_KEY}
+  access-expiration: 3600000 # 1시간
+  refresh-expiration: 1209600000 # 14일
 
 cloud:
   aws:
-    credentials:
-      access-key: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY:default_value}
-      secret-key: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY:default_value}
     region:
       static: ${CLOUD_AWS_REGION_STATIC:ap-northeast-2}
+      auto: false
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID:default_value}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:default_value}
     s3:
+      enabled: true
       bucket: ${CLOUD_AWS_S3_BUCKET:dkfjfie}

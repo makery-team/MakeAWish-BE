@@ -27,7 +27,7 @@ public class AiAgentController {
             @RequestBody AiAgentRequest request) {
 
         AiAgentResponse response = aiAgentService.handleUserChat(
-                principalDetails.getUser().getId(),
+                principalDetails.user().getId(),
                 request.message()
         );
 

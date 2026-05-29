@@ -28,7 +28,7 @@ public class OrderController {
     public ResponseEntity<Long> placeOrder(@AuthenticationPrincipal PrincipalDetails principalDetails,
                                            @RequestBody OrderCreateRequest orderRequest) {
 
-        Long orderId = orderService.createOrder(principalDetails.getUser().getId(), orderRequest);
+        Long orderId = orderService.createOrder(principalDetails.user().getId(), orderRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(orderId);
     }
 
@@ -39,8 +39,8 @@ public class OrderController {
     public ResponseEntity<OrderDetailResponse> getOrderDetail(@AuthenticationPrincipal PrincipalDetails principalDetails,
                                                               @PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrderDetail(orderId,
-                principalDetails.getUser().getId(),
-                principalDetails.getUser().getUserRole()));
+                principalDetails.user().getId(),
+                principalDetails.user().getUserRole()));
     }
 
     /**
@@ -53,7 +53,7 @@ public class OrderController {
 
         orderService.updateOrderStatus(
                 orderId,
-                principalDetails.getUser().getId(),
+                principalDetails.user().getId(),
                 status
         );
 
@@ -68,8 +68,8 @@ public class OrderController {
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
 
         List<OrderSummaryResponse> responses = orderService.getMyOrders(
-                principalDetails.getUser().getId(),
-                principalDetails.getUser().getUserRole()
+                principalDetails.user().getId(),
+                principalDetails.user().getUserRole()
         );
 
         return ResponseEntity.ok(responses);

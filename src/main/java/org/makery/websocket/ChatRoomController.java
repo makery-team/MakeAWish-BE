@@ -26,7 +26,7 @@ public class ChatRoomController {
     public ResponseEntity<ChatRoomWithMessagesDto> makeRoom(@AuthenticationPrincipal PrincipalDetails principalUser,
                                                             @RequestBody ChatRoomRequestDto chatRoomRequestDto) {
         // 1. 현재 로그인 유저를 DB에서 다시 조회 (영속 상태 보장)
-        User user = userService.findById(principalUser.getUser().getId());
+        User user = userService.findById(principalUser.user().getId());
 
         // 2. 상대 유저도 조회
         User other = userService.findById(chatRoomRequestDto.getOtherId());
@@ -49,7 +49,7 @@ public class ChatRoomController {
     @GetMapping("/chatting/rooms")
     public ResponseEntity<List<ChatRoomWithMessagesDto>> findAll(@AuthenticationPrincipal PrincipalDetails principalUser) {
         // principalUser에서 ID 추출
-        Long userId = principalUser.getUser().getId();
+        Long userId = principalUser.user().getId();
 
         List<ChatRoomWithMessagesDto> chatRooms = chatRoomService.findByUserId(userId);
         return ResponseEntity.ok(chatRooms);
@@ -60,7 +60,7 @@ public class ChatRoomController {
     @DeleteMapping("/chatting/rooms/{roomNumber}")
     public ResponseEntity<String> deleteRoom(@AuthenticationPrincipal PrincipalDetails principalUser, @PathVariable Long roomNumber) {
         // 영속화된 객체를 쓰기 위해 DB에서 다시 조회
-        User user = userService.findById(principalUser.getUser().getId());
+        User user = userService.findById(principalUser.user().getId());
 
         chatRoomService.deleteRoom(user, roomNumber);
         return ResponseEntity.ok("채팅방이 삭제되었습니다.");

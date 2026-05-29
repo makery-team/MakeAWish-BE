@@ -28,7 +28,7 @@ public class UserController {
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
 
         // PrincipalDetails 내부에 있는 User 엔티티에서 ID 추출
-        Long userId = principalDetails.getUser().getId();
+        Long userId = principalDetails.user().getId();
 
         UserProfileResponse response = userService.getUserProfile(userId);
 
@@ -57,7 +57,7 @@ public class UserController {
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody @Valid UserProfileInitRequest req) {
 
-        userService.initUserProfile(principalDetails.getUser().getId(), req);
+        userService.initUserProfile(principalDetails.user().getId(), req);
 
         return ResponseEntity.ok().build();
     }
@@ -71,7 +71,7 @@ public class UserController {
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody @Valid UserProfileUpdateRequest req) {
 
-        userService.updateMyProfile(principalDetails.getUser().getId(), req);
+        userService.updateMyProfile(principalDetails.user().getId(), req);
 
         return ResponseEntity.ok().build();
     }

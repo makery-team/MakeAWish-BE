@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Duration;
-
 @RequiredArgsConstructor
 @Service
 public class TokenService {
@@ -20,12 +18,12 @@ public class TokenService {
 
     // 로그인 시 액세스 토큰 생성
     public String generateAccessToken(User user) {
-        return tokenProvider.generateToken(user, Duration.ofHours(1)); // 1시간 유효
+        return tokenProvider.createAccessToken(user);
     }
 
     // 로그인 시 리프레시 토큰 생성
     public String generateRefreshToken(User user) {
-        return tokenProvider.generateToken(user, Duration.ofDays(7)); // 7일 유효
+        return tokenProvider.createRefreshToken(user);
     }
 
     public String createNewAccessToken(String refreshToken) {
@@ -37,7 +35,7 @@ public class TokenService {
         Long userId = refreshTokenService.findByRefreshToken(refreshToken).getUserId();
         User user = userService.findById(userId);
 
-        return tokenProvider.generateToken(user, Duration.ofHours(1));
+        return tokenProvider.createAccessToken(user);
     }
 
     public void validateToken(String accessToken) {
