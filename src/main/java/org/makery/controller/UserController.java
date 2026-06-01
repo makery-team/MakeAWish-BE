@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import org.makery.domain.PrincipalDetails;
 import org.makery.domain.User;
 import org.makery.dto.*;
+import org.makery.service.LikeService;
 import org.makery.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Validated
 @RestController
@@ -19,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+
+    // 💡 추가된 좋아요 비즈니스 로직 서비스
+    private final LikeService likeService;
 
     /**
      * 내 프로필 정보 조회 API
@@ -74,5 +80,24 @@ public class UserController {
         userService.updateMyProfile(principalDetails.user().getId(), req);
 
         return ResponseEntity.ok().build();
+    }
+
+    // ---------------------------------------------------------
+    // 내 찜(좋아요) 목록 조회 기능
+
+    /**
+     * 내 찜(좋아요) 목록 조회 API
+     * GET /api/users/me/likes
+     */
+    @GetMapping("/me/likes")
+    public ResponseEntity<List<PortfolioResponse>> getMyLikes(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        // 기존 코드 스타일에 맞추어 user().getId() 사용
+        Long userId = principalDetails.user().getId();
+
+        List<PortfolioResponse> responses = likeService.getMyLikedPortfolios(userId);
+
+        return ResponseEntity.ok(responses);
     }
 }

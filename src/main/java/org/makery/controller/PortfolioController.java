@@ -1,15 +1,18 @@
 package org.makery.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.makery.domain.PrincipalDetails;
 import org.makery.domain.Tag;
 import org.makery.dto.PortfolioFeedResponse;
 import org.makery.dto.PortfolioResponse;
+import org.makery.service.LikeService;
 import org.makery.service.PortfolioService;
 import org.makery.service.TagService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +25,9 @@ public class PortfolioController {
 
     private final PortfolioService portfolioService;
     private final TagService tagService;
+
+    // 💡 추가된 좋아요 비즈니스 로직 서비스
+    private final LikeService likeService;
 
     // 1. 포트폴리오 기본 조회 및 태그 검색
     @GetMapping
@@ -47,5 +53,31 @@ public class PortfolioController {
             @PageableDefault(size = 12) Pageable pageable) {
 
         return ResponseEntity.ok(portfolioService.searchFeedByTags(tags, pageable));
+    }
+
+    // ---------------------------------------------------------
+    // 💡 여기서부터 새로 추가된 좋아요(찜) 기능입니다.
+    // ---------------------------------------------------------
+
+    // 3. 포트폴리오 좋아요 추가
+    @PostMapping("/{portfolioId}/likes")
+    public ResponseEntity<Void> addLike(
+            @PathVariable("portfolioId") Long portfolioId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        // 💡 User() 가 아니라 소문자 user() 입니다!
+        likeService.addLike(principalDetails.user().getId(), portfolioId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 4. 포트폴리오 좋아요 취소
+    @DeleteMapping("/{portfolioId}/likes")
+    public ResponseEntity<Void> removeLike(
+            @PathVariable("portfolioId") Long portfolioId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        // 💡 User() 가 아니라 소문자 user() 입니다!
+        likeService.removeLike(principalDetails.user().getId(), portfolioId);
+        return ResponseEntity.noContent().build();
     }
 }
