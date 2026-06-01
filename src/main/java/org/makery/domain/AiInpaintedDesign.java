@@ -22,20 +22,20 @@ public class AiInpaintedDesign {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_portfolio_id")
-    private Portfolio originPortfolio; // 인페인팅의 모태가 된 원본 디자인
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "source_message_id")
-    private AiAgentMessage sourceMessage; // 인페인팅을 발생시킨 대화 맥락
+    private Portfolio originPortfolio;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String inpaintingPrompt; // 무엇을 '인페인팅' 했는지 기록
+    private String inpaintingPrompt;
 
     @Column(nullable = false)
-    private String beforeImageUrl; // 인페인팅 전 (Original)
+    private String beforeImageUrl;
 
+    @Column // 완료 전까지는 주소가 없으므로 nullable 허용
+    private String afterImageUrl;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String afterImageUrl;  // 인페인팅 후 (S3에 저장된 최종본)
+    private InpaintingStatus status; // ★ 진행 상태 필드 추가
 
     @Builder.Default
     private boolean isStoredInAlbum = true;
@@ -45,5 +45,15 @@ public class AiInpaintedDesign {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    // 웹훅을 통해 결과가 도착했을 때 업데이트하는 메서드
+    public void updateComplete(String permanentUrl) {
+        this.afterImageUrl = permanentUrl;
+        this.status = InpaintingStatus.COMPLETED;
+    }
+
+    public void updateFailed() {
+        this.status = InpaintingStatus.FAILED;
     }
 }
