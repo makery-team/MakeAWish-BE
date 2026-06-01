@@ -1,6 +1,6 @@
 package org.makery.dto;
 
 public record InpaintingRequest(
-        String prompt,      // 예: "케이크 위에 '21'이라는 숫자를 써줘"
-        String maskImage    // 수정할 영역이 표시된 이미지 데이터 (보통 Base64 문자열)
+        String prompt,      // 예: "케이크 위에 딸기를 올려줘"
+        String maskImage    // 프론트엔드에서 그린 마스킹 영역 (Base64 형식)
 ) {}

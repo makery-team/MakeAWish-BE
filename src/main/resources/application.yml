@@ -9,31 +9,42 @@ spring:
     defer-datasource-initialization: true
 
   # 로컬 테스트용
-#  datasource:
-#    url: jdbc:h2:mem:testdb
-#    username: sa
-#  h2:
-#    console:
-#      enabled: true
-
-  # 서버 배포용
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
   h2:
     console:
-      enabled: false
+      enabled: true
+
+  # 서버 배포용
+#  datasource:
+#    url: ${SPRING_DATASOURCE_URL}
+#    username: ${SPRING_DATASOURCE_USERNAME}
+#    password: ${SPRING_DATASOURCE_PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#  h2:
+#    console:
+#      enabled: false
 
   sql:
     init:
       mode: always
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 10000  # 서버와 연결을 시도하는 최대 시간 (10초)
+            readTimeout: 120000    # 서버의 응답을 기다리는 최대 시간 (120초 = 2분)
+
 app:
   auth:
     google:
       web-client-id: ${GOOGLE_CLIENT_ID}
+  server:
+    base-url: ${APP_SERVER_BASE_URL:http://localhost:8080}
+
 jwt:
   issuer: ${JWT_ISSUER}
   secret-key: ${JWT_SECRET_KEY}
@@ -46,8 +57,12 @@ cloud:
       static: ${CLOUD_AWS_REGION_STATIC:ap-northeast-2}
       auto: false
     credentials:
-      access-key: ${AWS_ACCESS_KEY_ID:default_value}
-      secret-key: ${AWS_SECRET_ACCESS_KEY:default_value}
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
     s3:
       enabled: true
-      bucket: ${CLOUD_AWS_S3_BUCKET:dkfjfie}
+      bucket: ${CLOUD_AWS_S3_BUCKET}
+
+ai:
+  server:
+    url: ${AI_SERVER_URL}
