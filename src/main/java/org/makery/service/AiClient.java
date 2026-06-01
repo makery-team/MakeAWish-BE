@@ -14,6 +14,6 @@ public interface AiClient {
     AiIntentResponse analyzeIntent(@RequestBody AiIntentRequest request);
 
     // 대기하지 않고 비동기 요청만 전달 (반환값 최소화)
-    @PostMapping("/api/ai/inpaint/async")
+    @PostMapping("/api/ai/inpaint")
     void requestInpaintedImageAsync(@RequestBody InpaintingAiAsyncRequest request);
 }
