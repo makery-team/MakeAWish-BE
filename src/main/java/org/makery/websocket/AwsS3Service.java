@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64; // ★ Base64 디코딩을 위해 추가
 import java.util.UUID;
 
 @Service
@@ -26,21 +27,76 @@ public class AwsS3Service {
     private String bucket;
 
     private final AmazonS3 amazonS3;
+    private final RestTemplate restTemplate;
 
+    /**
+     * 🌟 [추가됨] AI 서버가 웹훅으로 보낸 결과물(Base64 텍스트)을 S3에 직접 업로드합니다.
+     */
+    public String uploadFromBase64(String base64Data) {
+        if (base64Data == null || base64Data.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "업로드할 이미지 데이터가 비어 있습니다.");
+        }
+
+        try {
+            // 1. Data URL 접두사(data:image/jpeg;base64,)가 붙어있을 경우 순수 Base64 문자열만 추출
+            String pureBase64 = base64Data;
+            if (base64Data.contains(",")) {
+                pureBase64 = base64Data.split(",")[1];
+            }
+
+            // 2. Base64 문자열을 진짜 바이트(이진 데이터) 배열로 디코딩
+            byte[] imageBytes = Base64.getDecoder().decode(pureBase64);
+            InputStream inputStream = new ByteArrayInputStream(imageBytes);
+
+            // 3. 파일 이름 및 메타데이터 정의 (고유한 UUID 기반 저장)
+            String fileName = "inpainted/" + UUID.randomUUID().toString() + ".jpg";
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(imageBytes.length);
+            metadata.setContentType("image/jpeg"); // AI 서버 출력 양식(JPEG)에 일치시킴
+
+            // 4. AWS S3 실제 퍼블릭 업로드 실행
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+
+            // 5. 영구 보관된 실제 S3 URL 경로 반환
+            return amazonS3.getUrl(bucket, fileName).toString();
+
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 형식의 Base64 데이터입니다.", e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 업로드(Base64) 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    /**
+     * 기존 임시 이미지 URL 다운로드 후 S3 업로드 로직
+     */
     public String uploadFromUrl(String imageUrl) {
         try {
             // 1. 이미지 URL에서 데이터 다운로드
-            byte[] imageBytes = new RestTemplate().getForObject(imageUrl, byte[].class);
+            byte[] imageBytes = restTemplate.getForObject(imageUrl, byte[].class);
+            if (imageBytes == null) {
+                throw new RuntimeException("이미지 다운로드에 실패했습니다.");
+            }
             InputStream inputStream = new ByteArrayInputStream(imageBytes);
 
-            String fileName = "inpainted/" + java.util.UUID.randomUUID() + ".png";
+            String fileName = "inpainted/" + UUID.randomUUID().toString() + ".png";
 
-            // 2. S3 업로드 로직 (기존에 작성하신 S3 업로드 코드를 호출하세요)
-            // return amazonS3.putObject(...);
+            // 2. 메타데이터 설정 (필수)
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(imageBytes.length);
+            metadata.setContentType("image/png");
 
-            return "https://your-bucket-url.s3.amazonaws.com/" + fileName; // 예시 반환값
+            // 3. 실제 S3 업로드 실행
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+
+            // 4. 업로드된 실제 S3 URL 반환
+            return amazonS3.getUrl(bucket, fileName).toString();
+
         } catch (Exception e) {
-            throw new RuntimeException("S3 업로드 중 오류가 발생했습니다.", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드 중 오류가 발생했습니다.", e);
         }
     }
 

@@ -2,6 +2,7 @@ package org.makery.config;
 
 import lombok.RequiredArgsConstructor;
 import org.makery.config.jwt.TokenProvider;
+import org.makery.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,6 +28,7 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+    private final UserRepository userRepository;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -44,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
-//                .requestMatchers(toH2Console())
+                .requestMatchers(toH2Console())
                 .requestMatchers("/img/**", "/css/**", "/js/**");
     }
 
@@ -64,7 +66,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/api/users/check-nickname/**").permitAll()
-                        // 💡 수정됨: 다중 소셜 로그인을 위해 /api/auth/** 패턴으로 통합
+                        .requestMatchers("/api/ai-agent/**").permitAll()
                         .requestMatchers("/api/token", "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()
                         .requestMatchers("/chatting/**").authenticated()
@@ -81,9 +83,15 @@ public class SecurityConfig {
                 )
 
                 // 5. JWT 검증 커스텀 필터 등록
+                .addFilterBefore(masterKeyFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public MasterKeyFilter masterKeyFilter() {
+        return new MasterKeyFilter(userRepository);
     }
 
     @Bean

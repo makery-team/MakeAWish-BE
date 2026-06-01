@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/ai-agent")
 @RequiredArgsConstructor
-public class AiAgentController {
+public class AiChatController {
 
     private final AiAgentService aiAgentService;
 
@@ -27,7 +27,7 @@ public class AiAgentController {
             @RequestBody AiAgentRequest request) {
 
         AiAgentResponse response = aiAgentService.handleUserChat(
-                principalDetails.user().getId(),
+                principalDetails.user(),
                 request.message()
         );
 
