@@ -34,4 +34,12 @@ public class Review extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    public void updateReview(String content, Integer rating, String imageUrl) {
+        this.content = content;
+        this.rating = rating;
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+    }
 }
