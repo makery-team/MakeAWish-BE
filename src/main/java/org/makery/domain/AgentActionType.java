@@ -15,7 +15,6 @@ public enum AgentActionType {
 
     // 2. 이미지 편집 (AI 에디터)
     EDIT_IMAGE("이미지 편집 모드 진입"),    // 에디터 UI를 띄울 때 사용
-    INPAINTING_RESULT("인페인팅 결과 표시"), // 편집 완료 후 결과 이미지를 보여줄 때 사용
 
     // 3. 주문 프로세스 (대화형 주문)
     SHOW_SCHEMA("주문 양식 표시"),         // 슬롯 필링 중 입력 폼 노출
