@@ -28,7 +28,8 @@ public class AiChatController {
 
         AiAgentResponse response = aiAgentService.handleUserChat(
                 principalDetails.user(),
-                request.message()
+                request.message(),
+                request.productId()
         );
 
         return ResponseEntity.ok(response);

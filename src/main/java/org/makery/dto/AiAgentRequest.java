@@ -1,5 +1,6 @@
 package org.makery.dto;
 
 public record AiAgentRequest(
-        String message
+        String message,
+        Long productId
 ) {}

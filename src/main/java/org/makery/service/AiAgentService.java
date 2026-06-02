@@ -5,11 +5,13 @@ import org.makery.domain.AgentActionType;
 import org.makery.domain.AiAgentMessage;
 import org.makery.domain.SenderRole;
 import org.makery.domain.User;
+import org.makery.domain.Product;
 import org.makery.dto.AiAgentResponse;
 import org.makery.dto.AiIntentRequest;
 import org.makery.dto.AiIntentResponse;
 import org.makery.dto.AiMessageDto;
 import org.makery.repository.AiAgentMessageRepository;
+import org.makery.repository.ProductRepository;
 import org.makery.service.handler.IntentHandler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -25,10 +27,11 @@ public class AiAgentService {
 
     private final AiClient aiClient;
     private final AiAgentMessageRepository messageRepository;
+    private final ProductRepository productRepository;
     private final List<IntentHandler> intentHandlers; // 스프링이 핸들러 구현체들을 자동 주입
 
     @Transactional
-    public AiAgentResponse handleUserChat(User user, String userMessage) {
+    public AiAgentResponse handleUserChat(User user, String userMessage, Long productId) {
 
         // 1. 이전 대화 내역 조회
         List<AiAgentMessage> pastMessages = messageRepository.findByUserIdOrderByCreatedAtAsc(user.getId());
@@ -42,8 +45,17 @@ public class AiAgentService {
         // 2. 현재 사용자 질문 저장
         saveMessage(user, userMessage, SenderRole.USER, null, null);
 
-        // 3. AI 서버 통신
-        AiIntentRequest request = new AiIntentRequest(chatHistory, userMessage);
+        // 3. 상품 스키마 조회
+        Map<String, Object> schemaJson = null;
+        if (productId != null) {
+            Product product = productRepository.findById(productId).orElse(null);
+            if (product != null) {
+                schemaJson = product.getOrderSchema();
+            }
+        }
+
+        // 4. AI 서버 통신
+        AiIntentRequest request = new AiIntentRequest(chatHistory, userMessage, schemaJson);
         AiIntentResponse aiResponse = aiClient.analyzeIntent(request);
 
         // (로그 출력 - 선택사항)
