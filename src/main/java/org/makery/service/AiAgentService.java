@@ -76,4 +76,9 @@ public class AiAgentService {
     public void saveAiResponseAsync(User user, AiAgentResponse response) {
         saveMessage(user, response.message(), SenderRole.ASSISTANT, response.actionType(), response.data());
     }
+
+    @Transactional
+    public void clearChatHistory(User user) {
+        messageRepository.deleteByUserId(user.getId());
+    }
 }
