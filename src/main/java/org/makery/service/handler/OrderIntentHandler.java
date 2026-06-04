@@ -25,7 +25,6 @@ public class OrderIntentHandler implements IntentHandler {
     @Override
     public AiAgentResponse handle(User user, AiIntentResponse aiResponse) {
         // AI가 파싱해서 넘겨준 data (또는 extracted_slots) 객체를 그대로 프론트엔드로 전달합니다.
-        
         // 2. 응답 데이터(data)를 수정 가능한 HashMap으로 변환
         Map<String, Object> responseData = (aiResponse.data() != null) 
                 ? new java.util.HashMap<>(aiResponse.data()) 
