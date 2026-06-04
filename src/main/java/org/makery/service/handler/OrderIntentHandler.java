@@ -25,15 +25,23 @@ public class OrderIntentHandler implements IntentHandler {
     @Override
     public AiAgentResponse handle(User user, AiIntentResponse aiResponse) {
         // AI가 파싱해서 넘겨준 data (또는 extracted_slots) 객체를 그대로 프론트엔드로 전달합니다.
-        Map<String, Object> responseData = aiResponse.data();
         
-        // 파이썬 AI 서버가 extracted_slots를 data 밖으로 빼서 줬을 경우를 대비한 방어 로직
-        if (responseData == null && aiResponse.extracted_slots() != null) {
-            responseData = Map.of("extracted_slots", aiResponse.extracted_slots());
+        // 2. 응답 데이터(data)를 수정 가능한 HashMap으로 변환
+        Map<String, Object> responseData = (aiResponse.data() != null) 
+                ? new java.util.HashMap<>(aiResponse.data()) 
+                : new java.util.HashMap<>();
+        
+        // ★ 필수: 챗봇 화면에 표시하기 위해 추출된 슬롯 데이터를 응답에 포함
+        if (aiResponse.extracted_slots() != null) {
+            responseData.put("extracted_slots", aiResponse.extracted_slots());
         }
 
+        String message = (aiResponse.message() != null && !aiResponse.message().isBlank()) 
+                ? aiResponse.message() 
+                : "주문 내용을 확인해주세요.";
+
         return new AiAgentResponse(
-                aiResponse.message() != null ? aiResponse.message() : "주문 내용을 확인해주세요.",
+                message,
                 aiResponse.actionType(),
                 responseData
         );
