@@ -11,6 +11,8 @@ public record PortfolioFeedResponse(
         Long id,
         String imageUrl,
         String storeName,
+        Long storeId,
+        Long productId,
         List<String> tags,
         int likeCount,
         boolean isInpaintingAllowed
@@ -20,6 +22,8 @@ public record PortfolioFeedResponse(
                 .id(portfolio.getId())
                 .imageUrl(portfolio.getImageUrl())
                 .storeName(portfolio.getStore().getName())
+                .storeId(portfolio.getStore().getId())
+                .productId(portfolio.getProduct() != null ? portfolio.getProduct().getId() : null)
                 .tags(portfolio.getTags().stream().map(Tag::getName).toList())
                 .likeCount(portfolio.getLikeCount())
                 .isInpaintingAllowed(portfolio.isInpaintingAllowed())
