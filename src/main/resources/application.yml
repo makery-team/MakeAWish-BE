@@ -30,7 +30,6 @@ spring:
   sql:
     init:
       mode: always
-      data-locations: classpath:datatest.sql
 
   cloud:
     openfeign:
