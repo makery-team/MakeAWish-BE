@@ -45,6 +45,9 @@ VALUES (1, 'https://example.com/cake1.jpg', 'https://example.com/ai-cake.jpg', '
 INSERT IGNORE INTO reviews (id, content, rating, store_id, order_id, created_at, modified_at) VALUES (1, '케이크 정말 예뻐요!', 5, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- [7] 제약 조건 복구 및 시퀀스 보정
+-- 포트폴리오와 태그 연결 (이게 있어야 홈 화면에 뜹니다!)
+INSERT IGNORE INTO portfolio_tags (portfolio_id, tag_id) VALUES (1, 3), (2, 10), (3, 7), (4, 8), (5, 4), (6, 5), (7, 9);
+
 SET FOREIGN_KEY_CHECKS = 1;
 ALTER TABLE users AUTO_INCREMENT = 100;
 ALTER TABLE portfolios AUTO_INCREMENT = 5000;
