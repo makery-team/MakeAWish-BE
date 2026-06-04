@@ -85,21 +85,21 @@ public class AiInpaintedDesignService {
             return;
         }
 
-        // AI 서버 자체 처리 실패 응답 또는 이미지 데이터가 비어 유입된 경우 처리
-        if (!"SUCCESS".equalsIgnoreCase(aiStatus) || resultBase64 == null || resultBase64.isBlank()) {
+        // AI 서버 자체 처리 실패 응답 또는 데이터 누락
+        if (!"COMPLETED".equalsIgnoreCase(aiStatus) || resultBase64 == null || resultBase64.isBlank()) {
             log.error("AI 서버 인페인팅 실패 웹훅 수신 또는 파일 데이터 누락. TaskID: {}", taskId);
             pendingDesign.updateFailed();
             return;
         }
 
         try {
-            // S3 원격 저장소에 수신받은 Base64 바이너리 스트림 다이렉트 업로드 실행
-            String permanentUrl = awsS3Service.uploadFromBase64(resultBase64);
+            // Python 서버에서 이미 S3에 업로드 후 URL을 넘겨주므로, 재업로드 과정 생략하고 바로 저장
+            String permanentUrl = resultBase64;
 
             // 데이터베이스 엔티티 상태를 COMPLETED로 변경 및 영구 보관 URL 세팅 (Dirty Checking)
             pendingDesign.updateComplete(permanentUrl);
 
-            log.info("인페인팅 비동기 웹훅 파이프라인 처리 완료. S3 적재 성공. TaskID: {}", taskId);
+            log.info("인페인팅 비동기 웹훅 파이프라인 처리 완료. DB 저장 성공. TaskID: {}", taskId);
 
             // TODO: [선택 사항] WebSocket 기반 클라이언트 Push 또는 SSE 응답 세션을 이곳에서 호출
 
