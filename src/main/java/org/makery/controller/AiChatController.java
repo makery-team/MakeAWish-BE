@@ -8,6 +8,7 @@ import org.makery.service.AiAgentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,5 +34,12 @@ public class AiChatController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/chat")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> clearChatHistory(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        aiAgentService.clearChatHistory(principalDetails.user());
+        return ResponseEntity.ok().build();
     }
 }

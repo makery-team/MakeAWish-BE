@@ -16,6 +16,7 @@ public interface AiAgentMessageRepository extends JpaRepository<AiAgentMessage, 
     List<AiAgentMessage> findByUserIdOrderByCreatedAtAsc(Long userId);
 
     /**
-     * 최근 대화 세션별로 이력을 조회하거나, 특정 개수만큼만 가져올 때 확장 가능
+     * 특정 사용자의 전체 AI 대화 내역 삭제 (초기화)
      */
+    void deleteByUserId(Long userId);
 }
