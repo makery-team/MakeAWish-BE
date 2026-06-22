@@ -13,10 +13,7 @@ public enum AgentActionType {
     SIMPLE_CHAT("단순 대화"),
     PORTFOLIO_LIST("디자인 추천 목록"),
 
-    // 2. 이미지 편집 (AI 에디터)
-    EDIT_IMAGE("이미지 편집 모드 진입"),    // 에디터 UI를 띄울 때 사용
-
-    // 3. 주문 프로세스 (대화형 주문)
+    // 2. 주문 프로세스 (대화형 주문)
     SHOW_SCHEMA("주문 양식 표시"),         // 슬롯 필링 중 입력 폼 노출
     CONFIRM_SLOTS("주문 정보 확인"),        // 모든 정보 수집 완료 후 최종 확인
     ORDER_SUMMARY("주문 요약 및 결제 안내"); // 금액 계산 포함 최종 요약
