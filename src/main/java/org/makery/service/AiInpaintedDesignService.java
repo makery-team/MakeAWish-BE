@@ -40,12 +40,29 @@ public class AiInpaintedDesignService {
 
         String cleanMaskB64 = extractPureBase64(request.maskImage());
 
+        // 연속 편집을 위한 현재 이미지 판단 (URL 또는 Base64)
+        String imageUrl = null;
+        String imageB64 = null;
+        
+        if (request.currentImage() != null && !request.currentImage().isBlank()) {
+            if (request.currentImage().startsWith("http")) {
+                imageUrl = request.currentImage().split("\\?")[0]; // 캐시 무효화 쿼리스트링 제거
+            } else {
+                imageB64 = extractPureBase64(request.currentImage());
+            }
+        } else {
+            imageUrl = origin.getImageUrl();
+        }
+
+        // DB에 저장할 'beforeImageUrl' 처리
+        String beforeImageForDb = (imageUrl != null) ? imageUrl : "BASE64_EDITED_IMAGE";
+
         // 1. PENDING 상태로 DB에 우선 저장 (비동기 콜백 추적용 ID 발급)
         AiInpaintedDesign pendingDesign = aiInpaintedDesignRepository.save(AiInpaintedDesign.builder()
                 .user(user)
                 .originPortfolio(origin)
                 .inpaintingPrompt(request.prompt())
-                .beforeImageUrl(origin.getImageUrl())
+                .beforeImageUrl(beforeImageForDb)
                 .status(InpaintingStatus.PENDING)
                 .build());
 
@@ -53,7 +70,8 @@ public class AiInpaintedDesignService {
         String webhookUrl = backendBaseUrl + "/api/ai-agent/webhook/inpaint";
         InpaintingAiAsyncRequest aiRequest = new InpaintingAiAsyncRequest(
                 request.prompt(),
-                origin.getImageUrl(),
+                imageUrl,
+                imageB64,
                 cleanMaskB64,
                 pendingDesign.getId(),
                 webhookUrl
