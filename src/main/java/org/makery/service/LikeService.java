@@ -65,19 +65,8 @@ public class LikeService {
 
         List<Like> likes = likeRepository.findAllByUser(user);
 
-        // 💡 에러 해결: PortfolioResponse Record 생성자(Long, String, List<String>, boolean, int)에 맞게 매핑
         return likes.stream()
-                .map(like -> {
-                    Portfolio p = like.getPortfolio();
-
-                    return new PortfolioResponse(
-                            p.getId(),               // 1. Long: 포트폴리오 ID
-                            p.getTitle(),            // 2. String: 포트폴리오 제목 (※ p.getTitle()에 빨간줄이 뜨면 엔티티에 맞춰 변경)
-                            List.of(),               // 3. List<String>: 태그 등 빈 리스트 처리
-                            true,                    // 4. boolean: 찜 여부 (내 찜 목록이므로 무조건 true)
-                            0                        // 5. int: 조회수 등 (임시로 0)
-                    );
-                })
+                .map(like -> PortfolioResponse.from(like.getPortfolio()))
                 .collect(Collectors.toList());
     }
 }
