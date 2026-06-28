@@ -11,17 +11,27 @@ import java.time.LocalDateTime;
 @Builder
 public class ReviewResponse {
     private Long id;
+    private Long storeId;
+    private Long orderId;
+    private Long userId;
     private String nickname; // 작성자 닉네임
     private String content;  // 리뷰 내용
     private Integer rating;  // 별점
+    private String imageUrl; // 케이크 사진
+    private String storeName; // 매장 이름
     private LocalDateTime createdAt; // 작성일
 
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()
                 .id(review.getId())
-                .nickname(review.getOrder().getUser().getNickname()) // 작성자 정보에서 닉네임 가져오기
+                .storeId(review.getStore() != null ? review.getStore().getId() : null)
+                .orderId(review.getOrder() != null ? review.getOrder().getId() : null)
+                .userId(review.getOrder() != null && review.getOrder().getUser() != null ? review.getOrder().getUser().getId() : null)
+                .nickname(review.getOrder() != null && review.getOrder().getUser() != null ? review.getOrder().getUser().getNickname() : null)
                 .content(review.getContent())
                 .rating(review.getRating())
+                .imageUrl(review.getImageUrl())
+                .storeName(review.getStore() != null ? review.getStore().getName() : null)
                 .createdAt(review.getCreatedAt())
                 .build();
     }
