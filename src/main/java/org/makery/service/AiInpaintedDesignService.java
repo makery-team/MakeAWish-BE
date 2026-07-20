@@ -45,7 +45,7 @@ public class AiInpaintedDesignService {
         
         if (request.currentImage() != null && !request.currentImage().isBlank()) {
             if (request.currentImage().startsWith("http")) {
-                imageUrl = request.currentImage().split("\\?")[0]; // 캐시 무효화 쿼리스트링 제거
+                imageUrl = request.currentImage();
             } else {
                 imageB64 = extractPureBase64(request.currentImage());
             }
