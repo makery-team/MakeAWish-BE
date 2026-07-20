@@ -35,8 +35,7 @@ public class AiInpaintedDesignService {
      */
     @Transactional
     public InpaintingResponse requestInpainting(Long portfolioId, InpaintingRequest request, User user) {
-        Portfolio origin = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new EntityNotFoundException("원본 디자인을 찾을 수 없습니다."));
+        Portfolio origin = portfolioRepository.findById(portfolioId).orElse(null);
 
         String cleanMaskB64 = extractPureBase64(request.maskImage());
 
@@ -51,7 +50,7 @@ public class AiInpaintedDesignService {
                 imageB64 = extractPureBase64(request.currentImage());
             }
         } else {
-            imageUrl = origin.getImageUrl();
+            imageUrl = origin != null ? origin.getImageUrl() : null;
         }
 
         // DB에 저장할 'beforeImageUrl' 처리
