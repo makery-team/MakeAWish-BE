@@ -1,9 +1,13 @@
 package org.makery.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.makery.domain.PrincipalDetails;
 import org.makery.domain.Store;
+import org.makery.domain.User;
 import org.makery.dto.OrderSchemaResponse;
 import org.makery.dto.PortfolioResponse;
+import org.makery.dto.StoreProfileUpdateRequest;
 import org.makery.dto.StoreResponse;
 import org.makery.service.PortfolioService;
 import org.makery.service.StoreService;
@@ -12,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -79,5 +84,19 @@ public class StoreController {
     public ResponseEntity<OrderSchemaResponse> getOrderSchema(@PathVariable("storeId") Long storeId) {
         OrderSchemaResponse response = storeService.getOrderSchema(storeId);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 매장 프로필 정보 수정
+     * PATCH /api/stores/profile
+     */
+    @PatchMapping("/stores/profile")
+    public ResponseEntity<Void> updateStoreProfile(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Valid @RequestBody StoreProfileUpdateRequest request) {
+
+        User currentSeller = principalDetails.user();
+        storeService.updateStoreProfile(currentSeller, request);
+        return ResponseEntity.ok().build();
     }
 }

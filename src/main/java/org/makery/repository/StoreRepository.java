@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
@@ -31,4 +32,10 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     List<Store> findNearbyStores(@Param("lat") Double lat,
                                  @Param("lng") Double lng,
                                  @Param("radius") Double radius);
+
+    // 사장님 User ID로 연결된 Store를 직접 찾아오는 쿼리
+    @Query("SELECT s FROM Store s " +
+            "JOIN s.sellerProfile sp " +
+            "WHERE sp.user.id = :userId")
+    Optional<Store> findByUserId(@Param("userId") Long userId);
 }
