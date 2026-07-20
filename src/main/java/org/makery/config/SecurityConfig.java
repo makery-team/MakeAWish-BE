@@ -66,6 +66,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/api/users/check-nickname/**").permitAll()
+                        .requestMatchers("/api/ai-agent/webhook/**").permitAll()
                         .requestMatchers("/api/ai-agent/**").authenticated()
                         .requestMatchers("/api/token", "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()
