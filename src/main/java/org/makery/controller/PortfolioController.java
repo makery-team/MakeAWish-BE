@@ -1,16 +1,18 @@
 package org.makery.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.PrincipalDetails;
 import org.makery.domain.Tag;
-import org.makery.dto.PortfolioFeedResponse;
-import org.makery.dto.PortfolioResponse;
+import org.makery.domain.User;
+import org.makery.dto.*;
 import org.makery.service.LikeService;
 import org.makery.service.PortfolioService;
 import org.makery.service.TagService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +27,11 @@ public class PortfolioController {
 
     private final PortfolioService portfolioService;
     private final TagService tagService;
-
-    // 💡 추가된 좋아요 비즈니스 로직 서비스
     private final LikeService likeService;
+
+    // ==========================================
+    // [사용자 기능]
+    // ==========================================
 
     // 1. 포트폴리오 기본 조회 및 태그 검색
     @GetMapping
@@ -55,10 +59,6 @@ public class PortfolioController {
         return ResponseEntity.ok(portfolioService.searchFeedByTags(tags, pageable));
     }
 
-    // ---------------------------------------------------------
-    // 💡 여기서부터 새로 추가된 좋아요(찜) 기능입니다.
-    // ---------------------------------------------------------
-
     // 3. 포트폴리오 좋아요 추가
     @PostMapping("/{portfolioId}/likes")
     public ResponseEntity<Void> addLike(
@@ -79,5 +79,48 @@ public class PortfolioController {
         // 💡 User() 가 아니라 소문자 user() 입니다!
         likeService.removeLike(principalDetails.user().getId(), portfolioId);
         return ResponseEntity.noContent().build();
+    }
+
+    // ==========================================
+    // [사장님(Partner) 기능]
+    // ==========================================
+
+    /**
+     * 등록 전 포트폴리오 태그 추천 API
+     * POST /api/portfolios/tags/recommend
+     */
+    @PostMapping("/tags/recommend")
+    public ResponseEntity<List<String>> recommendPortfolioTags(
+            @Valid @RequestBody PortfolioTagRecommendRequest request) {
+
+        List<String> recommendedTags = portfolioService.recommendTagsWithAi(request);
+        return ResponseEntity.ok(recommendedTags);
+    }
+
+    /**
+     * 포트폴리오 신규 등록
+     * POST /api/portfolios
+     */
+    @PostMapping
+    public ResponseEntity<Void> registerPortfolio(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Valid @RequestBody PortfolioRegisterRequest request) {
+
+        User currentSeller = principalDetails.user();
+        portfolioService.registerPortfolio(currentSeller, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * 포트폴리오 정보 수정
+     * PATCH /api/portfolios/{portfolioId}
+     */
+    @PatchMapping("/{portfolioId}")
+    public ResponseEntity<Void> updatePortfolio(
+            @PathVariable("portfolioId") Long portfolioId,
+            @RequestBody PortfolioUpdateRequest request) {
+
+        portfolioService.updatePortfolio(portfolioId, request);
+        return ResponseEntity.ok().build();
     }
 }
