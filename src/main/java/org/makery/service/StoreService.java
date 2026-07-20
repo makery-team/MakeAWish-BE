@@ -2,8 +2,11 @@ package org.makery.service;
 
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.Product; // 💡 Product 임포트 추가
+import org.makery.domain.SellerProfile;
 import org.makery.domain.Store;
+import org.makery.domain.User;
 import org.makery.dto.OrderSchemaResponse;
+import org.makery.dto.StoreProfileUpdateRequest;
 import org.makery.repository.ProductRepository; // 💡 ProductRepository 주입 필요
 import org.makery.repository.StoreRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +20,7 @@ import java.util.List;
 public class StoreService {
 
     private final StoreRepository storeRepository;
-    private final ProductRepository productRepository; // 💡 상품 조회를 위해 추가
+    private final ProductRepository productRepository;
 
     /**
      * 1. 매장 검색 및 전체 조회 (기존 유지)
@@ -55,5 +58,20 @@ public class StoreService {
 
         // 💡 이제 OrderSchemaResponse.from()은 Product를 인자로 받습니다.
         return OrderSchemaResponse.from(product);
+    }
+
+    /**
+     * 사장님의 매장 프로필 및 안내사항 수정
+     */
+    @Transactional
+    public void updateStoreProfile(User seller, StoreProfileUpdateRequest request) {
+        Store store = storeRepository.findByUserId(seller.getId())
+                .orElseThrow(() -> new IllegalStateException("등록된 매장 정보가 없는 사장님 계정입니다. User ID: " + seller.getId()));
+
+        store.setName(request.getName());
+        store.setDescription(request.getDescription());
+        store.setHours(request.getHours());
+        store.setNotice(request.getNotice());
+        store.setCautionNotice(request.getCautionNotice());
     }
 }

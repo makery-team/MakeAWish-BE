@@ -1,19 +1,23 @@
 package org.makery.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.makery.domain.Portfolio;
-import org.makery.domain.Tag;
-import org.makery.dto.PortfolioFeedResponse;
-import org.makery.dto.PortfolioResponse;
+import org.makery.domain.*;
+import org.makery.dto.*;
 import org.makery.repository.PortfolioRepository;
+import org.makery.repository.ProductRepository;
+import org.makery.repository.StoreRepository;
+import org.makery.repository.TagRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,10 @@ import java.util.Set;
 public class PortfolioService {
 
     private final PortfolioRepository portfolioRepository;
+    private final ProductRepository productRepository;
+    private final TagRepository tagRepository;
+    private final StoreRepository storeRepository;
+    private final AiClient aiClient;
 
     /**
      * 💡 추가된 메서드: 특정 매장(storeId)의 포트폴리오를 페이징 처리해서 가져오기
@@ -75,5 +83,79 @@ public class PortfolioService {
         Long tagCount = (long) tags.size();
         return portfolioRepository.findByTags(tags, tagCount, pageable)
                 .map(PortfolioFeedResponse::from);
+    }
+
+    // ==========================================
+    // [사장님(Partner) 기능]
+    // ==========================================
+
+    /**
+     * 등록 전 AI 이미지 태그 추천 요청
+     */
+    public List<String> recommendTagsWithAi(PortfolioTagRecommendRequest request) {
+        AiTagRequest aiRequest = new AiTagRequest(request.getImageUrl());
+        AiTagResponse aiResponse = aiClient.generateTags(aiRequest);
+
+        if (aiResponse == null || aiResponse.tags() == null) {
+            return List.of();
+        }
+
+        return aiResponse.tags();
+    }
+
+    /**
+     * 포트폴리오 신규 등록
+     */
+    @Transactional
+    public void registerPortfolio(User seller, PortfolioRegisterRequest request) {
+        // [수정] DB 조회를 통해 LazyInitializationException 방지
+        Store store = storeRepository.findByUserId(seller.getId())
+                .orElseThrow(() -> new IllegalStateException("등록된 매장 정보가 없는 사장님 계정입니다. User ID: " + seller.getId()));
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 상품 카테고리 ID입니다. ID: " + request.getProductId()));
+
+        Set<Tag> tags = new HashSet<>();
+        if (request.getTags() != null) {
+            for (String tagName : request.getTags()) {
+                Tag tag = tagRepository.findByName(tagName)
+                        .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
+                tags.add(tag);
+            }
+        }
+
+        Portfolio portfolio = Portfolio.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .imageUrl(request.getImageUrl())
+                .product(product)
+                .store(store)
+                .tags(tags)
+                .isInpaintingAllowed(true)
+                .build();
+
+        portfolioRepository.save(portfolio);
+    }
+
+    /**
+     * 3. 포트폴리오 정보 수정
+     */
+    @Transactional
+    public void updatePortfolio(Long portfolioId, PortfolioUpdateRequest request) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 포트폴리오입니다. ID: " + portfolioId));
+
+        if (request.getTitle() != null) portfolio.setTitle(request.getTitle());
+        if (request.getDescription() != null) portfolio.setDescription(request.getDescription());
+        if (request.getImageUrl() != null) portfolio.setImageUrl(request.getImageUrl());
+        if (request.getIsInpaintingAllowed() != null) portfolio.setInpaintingAllowed(request.getIsInpaintingAllowed());
+
+        if (request.getTags() != null) {
+            Set<Tag> updatedTags = request.getTags().stream()
+                    .map(tagName -> tagRepository.findByName(tagName)
+                            .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build())))
+                    .collect(Collectors.toSet());
+            portfolio.setTags(updatedTags);
+        }
     }
 }
