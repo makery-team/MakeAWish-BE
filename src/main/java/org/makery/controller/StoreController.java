@@ -99,4 +99,32 @@ public class StoreController {
         storeService.updateStoreProfile(currentSeller, request);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * 매장별 주문서 양식(스키마) 생성 API
+     * POST /api/stores/{storeId}/order-schema
+     */
+    @PostMapping("/stores/{storeId}/order-schema")
+    public ResponseEntity<Void> createOrderSchema(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable("storeId") Long storeId,
+            @RequestBody org.makery.dto.OrderSchemaRequest request) {
+
+        storeService.createOrderSchema(principalDetails.user().getId(), storeId, request);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).build();
+    }
+
+    /**
+     * 매장별 주문서 양식(스키마) 수정 API
+     * PATCH /api/stores/{storeId}/order-template
+     */
+    @PatchMapping("/stores/{storeId}/order-template")
+    public ResponseEntity<Void> updateOrderSchema(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable("storeId") Long storeId,
+            @RequestBody org.makery.dto.OrderSchemaRequest request) {
+
+        storeService.createOrderSchema(principalDetails.user().getId(), storeId, request);
+        return ResponseEntity.ok().build();
+    }
 }

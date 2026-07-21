@@ -5,6 +5,7 @@ import org.makery.domain.Product; // 💡 Product 임포트 추가
 import org.makery.domain.SellerProfile;
 import org.makery.domain.Store;
 import org.makery.domain.User;
+import org.makery.dto.OrderSchemaRequest;
 import org.makery.dto.OrderSchemaResponse;
 import org.makery.dto.StoreProfileUpdateRequest;
 import org.makery.repository.ProductRepository; // 💡 ProductRepository 주입 필요
@@ -73,5 +74,43 @@ public class StoreService {
         store.setHours(request.getHours());
         store.setNotice(request.getNotice());
         store.setCautionNotice(request.getCautionNotice());
+    }
+
+    /**
+     * 매장 주문서 양식(스키마) 저장/수정
+     */
+    @Transactional
+    public void createOrderSchema(Long sellerId, Long storeId, OrderSchemaRequest request) {
+        Store store = storeRepository.findByUserId(sellerId)
+                .orElseThrow(() -> new IllegalStateException("등록된 매장 정보가 없는 사장님 계정입니다."));
+
+        if (!store.getId().equals(storeId)) {
+            throw new org.springframework.security.access.AccessDeniedException("본인 매장의 주문서 양식만 수정할 수 있습니다.");
+        }
+
+        Long productId = request.getProductId();
+        Product product;
+        if (productId != null) {
+            product = productRepository.findById(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다. ID: " + productId));
+            if (!product.getStore().getId().equals(storeId)) {
+                throw new IllegalArgumentException("해당 상품은 이 매장의 상품이 아닙니다.");
+            }
+        } else {
+            // fallback: 매장의 첫 번째 상품의 양식을 업데이트
+            if (store.getProducts().isEmpty()) {
+                throw new IllegalArgumentException("매장에 등록된 상품이 없습니다. 상품을 먼저 생성해주세요.");
+            }
+            product = store.getProducts().get(0);
+        }
+
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            java.util.Map<String, Object> schemaMap = objectMapper.readValue(request.getSchemaData(), java.util.Map.class);
+            product.setOrderSchema(schemaMap);
+            productRepository.save(product);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("올바르지 않은 JSON 스키마 형식입니다.", e);
+        }
     }
 }

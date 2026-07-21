@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderSchemaRequest {
+    private Long productId;
     // 포스트맨 Body에서 {"schemaData": "..."} 로 보내는 값을 담는 변수입니다.
     private String schemaData;
 }

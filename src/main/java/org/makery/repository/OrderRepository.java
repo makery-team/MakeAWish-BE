@@ -26,4 +26,26 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "where sp.user.id = :sellerId " +
             "order by o.createdAt desc")
     List<Order> findAllBySellerId(@Param("sellerId") Long sellerId);
+
+    // 특정 매장의 오늘 날짜 픽업 주문 조회
+    @Query("select o from Order o " +
+            "join o.store s " +
+            "join s.sellerProfile sp " +
+            "where sp.user.id = :sellerId " +
+            "and o.pickupDate >= :start " +
+            "and o.pickupDate <= :end " +
+            "order by o.pickupDate asc")
+    List<Order> findAllBySellerIdAndPickupDateBetween(@Param("sellerId") Long sellerId,
+                                                      @Param("start") java.time.LocalDateTime start,
+                                                      @Param("end") java.time.LocalDateTime end);
+
+    // 구매자의 오늘 날짜 픽업 주문 조회
+    @Query("select o from Order o " +
+            "where o.user.id = :userId " +
+            "and o.pickupDate >= :start " +
+            "and o.pickupDate <= :end " +
+            "order by o.pickupDate asc")
+    List<Order> findAllByUserIdAndPickupDateBetween(@Param("userId") Long userId,
+                                                    @Param("start") java.time.LocalDateTime start,
+                                                    @Param("end") java.time.LocalDateTime end);
 }
