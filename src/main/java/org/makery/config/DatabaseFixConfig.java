@@ -4,12 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
+import org.springframework.core.env.Environment;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 @Configuration
 @RequiredArgsConstructor
@@ -17,30 +15,25 @@ import java.sql.SQLException;
 public class DatabaseFixConfig {
 
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
+    private final Environment env;
 
     @Bean
-    public HibernatePropertiesCustomizer hibernatePropertiesCustomizer() {
+    public static HibernatePropertiesCustomizer hibernatePropertiesCustomizer(Environment environment) {
         return properties -> {
-            try (Connection conn = dataSource.getConnection()) {
-                String url = conn.getMetaData().getURL();
-                if (url != null && url.toLowerCase().contains("h2")) {
-                    log.info("H2 Database detected. Enabling Hibernate ddl-auto: update for local dev");
-                    properties.put("hibernate.hbm2ddl.auto", "update");
-                }
-            } catch (SQLException e) {
-                log.warn("Failed to determine DB type for ddl-auto", e);
+            String url = environment.getProperty("spring.datasource.url", "");
+            if (url.toLowerCase().contains("h2")) {
+                properties.put("hibernate.hbm2ddl.auto", "update");
             }
         };
     }
 
     @PostConstruct
     public void init() {
-        try (Connection conn = dataSource.getConnection()) {
-            String url = conn.getMetaData().getURL();
-            // MySQL 환경(Production)에서만 수동 스키마 초기화 진행 (H2는 위에서 ddl-auto로 자동 처리됨)
-            if (url != null && url.toLowerCase().contains("mysql")) {
-                log.info("MySQL Database detected. Executing safe table initialization...");
+        String url = env.getProperty("spring.datasource.url", "");
+        // MySQL 환경(Production)에서만 수동 스키마 초기화 진행 (H2는 위에서 ddl-auto로 자동 처리됨)
+        if (!url.toLowerCase().contains("h2")) {
+            try {
+                log.info("Production Database detected. Executing safe table initialization...");
                 
                 jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS portfolios (" +
                         "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
@@ -66,10 +59,10 @@ public class DatabaseFixConfig {
                 executeConstraintWithLogging("ALTER TABLE reviews ADD CONSTRAINT UK_reviews_order_id UNIQUE (order_id)");
                 
                 log.info("Safe table initialization completed.");
+            } catch (Exception e) {
+                log.error("Error during manual DB init", e);
+                throw new RuntimeException("Database initialization failed!", e);
             }
-        } catch (Exception e) {
-            log.error("Error during manual DB init", e);
-            throw new RuntimeException("Database initialization failed!", e);
         }
     }
 
