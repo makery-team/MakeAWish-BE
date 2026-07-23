@@ -55,11 +55,11 @@ INSERT INTO categories (id, name, store_id, created_at, modified_at) VALUES
 
 -- 5. 제품 (Products) - 5개
 INSERT INTO products (id, name, price, description, is_available, order_schema, store_id, created_at, modified_at) VALUES
-(1, '커스텀 도시락 케이크', 18000, '간단한 선물용 미니 케이크', true, JSON '{"type": "object", "properties": {"flavor": {"type": "string"}}}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(2, '프리미엄 포토 케이크', 35000, '식용 포토용지가 올라간 케이크', true, JSON '{"type": "object", "properties": {"photoUrl": {"type": "string"}}}', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(3, '시그니처 레터링 케이크', 25000, '마음을 전하는 레터링 케이크', true, JSON '{"type": "object", "properties": {"text": {"type": "string"}}}', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(4, '강아지 입체 케이크', 45000, '반려견 얼굴 입체 디자인', true, JSON '{"type": "object", "properties": {"dogBreed": {"type": "string"}}}', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(5, '생화 장식 2단 케이크', 60000, '파티, 브라이덜 샤워용', true, JSON '{"type": "object", "properties": {"flowerColor": {"type": "string"}}}', 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(1, '커스텀 도시락 케이크', 18000, '간단한 선물용 미니 케이크', true, '{"type": "object", "properties": {"flavor": {"type": "string"}}}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, '프리미엄 포토 케이크', 35000, '식용 포토용지가 올라간 케이크', true, '{"type": "object", "properties": {"photoUrl": {"type": "string"}}}', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, '시그니처 레터링 케이크', 25000, '마음을 전하는 레터링 케이크', true, '{"type": "object", "properties": {"text": {"type": "string"}}}', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, '강아지 입체 케이크', 45000, '반려견 얼굴 입체 디자인', true, '{"type": "object", "properties": {"dogBreed": {"type": "string"}}}', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, '생화 장식 2단 케이크', 60000, '파티, 브라이덜 샤워용', true, '{"type": "object", "properties": {"flowerColor": {"type": "string"}}}', 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 6. 태그 (Tags) - 원본 해시태그 41개 전부 등록
 INSERT INTO tags (id, name) VALUES 
