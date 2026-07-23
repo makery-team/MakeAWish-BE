@@ -69,6 +69,7 @@ public class DatabaseFixConfig {
             }
         } catch (Exception e) {
             log.error("Error during manual DB init", e);
+            throw new RuntimeException("Database initialization failed!", e);
         }
     }
 
@@ -79,9 +80,10 @@ public class DatabaseFixConfig {
             String msg = e.getMessage();
             // MySQL duplicate key error code is 1061
             if (msg != null && (msg.contains("Duplicate") || msg.contains("1061"))) {
-                log.debug("Constraint already exists, skipping: {}", sql);
+                log.info("Constraint already exists, skipping: {}", sql);
             } else {
-                log.warn("Failed to execute constraint: {} - Reason: {}", sql, msg);
+                log.error("Failed to execute constraint: {} - Reason: {}", sql, msg);
+                throw new RuntimeException("Failed to add required DB constraint", e);
             }
         }
     }
