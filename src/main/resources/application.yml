@@ -5,7 +5,7 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: create # update, create
+      ddl-auto: update # update, create
     defer-datasource-initialization: true
 
   # 로컬 테스트용
@@ -28,7 +28,7 @@ spring:
 
   sql:
     init:
-      mode: always
+      mode: never
 
   cloud:
     openfeign:
