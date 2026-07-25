@@ -71,9 +71,11 @@ public class DatabaseFixConfig {
             jdbcTemplate.execute(sql);
         } catch (Exception e) {
             String msg = e.getMessage();
-            // MySQL duplicate key error code is 1061
+            // MySQL duplicate key error code is 1061, Table doesn't exist is 1146
             if (msg != null && (msg.contains("Duplicate") || msg.contains("1061"))) {
                 log.info("Constraint already exists, skipping: {}", sql);
+            } else if (msg != null && msg.contains("1146")) {
+                log.warn("Table does not exist yet, skipping constraint: {}", sql);
             } else {
                 log.error("Failed to execute constraint: {} - Reason: {}", sql, msg);
                 throw new RuntimeException("Failed to add required DB constraint", e);
