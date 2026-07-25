@@ -25,8 +25,13 @@ public class TokenProvider {
     private final JwtProperties jwtProperties;
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.secretKey());
-        return Keys.hmacShaKeyFor(keyBytes);
+        try {
+            byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.secretKey());
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (Exception e) {
+            byte[] keyBytes = jwtProperties.secretKey().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            return Keys.hmacShaKeyFor(keyBytes);
+        }
     }
 
     public String createAccessToken(User user) {
