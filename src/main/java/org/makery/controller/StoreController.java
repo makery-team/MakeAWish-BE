@@ -99,4 +99,6 @@ public class StoreController {
         storeService.updateStoreProfile(currentSeller, request);
         return ResponseEntity.ok().build();
     }
+
+
 }
