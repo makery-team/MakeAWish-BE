@@ -6,6 +6,7 @@ import org.makery.domain.PrincipalDetails;
 import org.makery.domain.Store;
 import org.makery.domain.User;
 import org.makery.dto.OrderSchemaResponse;
+import org.makery.dto.OrderSchemaSaveRequest;
 import org.makery.dto.PortfolioResponse;
 import org.makery.dto.StoreProfileUpdateRequest;
 import org.makery.dto.StoreResponse;
@@ -83,6 +84,32 @@ public class StoreController {
     @GetMapping("/stores/{storeId}/order-schema")
     public ResponseEntity<OrderSchemaResponse> getOrderSchema(@PathVariable("storeId") Long storeId) {
         OrderSchemaResponse response = storeService.getOrderSchema(storeId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 매장별 주문서 양식(스키마) 생성 API
+     * POST /api/stores/{storeId}/order-schema
+     */
+    @PostMapping("/stores/{storeId}/order-schema")
+    public ResponseEntity<OrderSchemaResponse> createOrderSchema(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable("storeId") Long storeId,
+            @RequestBody OrderSchemaSaveRequest request) {
+        OrderSchemaResponse response = storeService.createOrUpdateOrderSchema(storeId, request, principalDetails.user());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 매장별 주문서 양식(템플릿) 수정 API
+     * PATCH /api/stores/{storeId}/order-template
+     */
+    @PatchMapping("/stores/{storeId}/order-template")
+    public ResponseEntity<OrderSchemaResponse> updateOrderTemplate(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable("storeId") Long storeId,
+            @RequestBody OrderSchemaSaveRequest request) {
+        OrderSchemaResponse response = storeService.createOrUpdateOrderSchema(storeId, request, principalDetails.user());
         return ResponseEntity.ok(response);
     }
 

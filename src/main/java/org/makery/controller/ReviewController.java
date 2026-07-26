@@ -3,6 +3,7 @@ package org.makery.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.PrincipalDetails;
+import org.makery.dto.ReviewReplyRequest;
 import org.makery.dto.ReviewRequest;
 import org.makery.dto.ReviewResponse;
 import org.makery.service.ReviewService;
@@ -94,5 +95,38 @@ public class ReviewController {
     ) {
         Slice<ReviewResponse> responses = reviewService.getMyReviews(principalDetails.user(), pageable);
         return ResponseEntity.ok(responses);
+    }
+
+    // ==========================================
+    // [사장님(Partner) 기능]
+    // ==========================================
+
+    /**
+     * 리뷰 답글 작성 및 수정 API
+     * POST /api/reviews/{reviewId}/reply
+     */
+    @PostMapping("/reviews/{reviewId}/reply")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ReviewResponse> createOrUpdateReply(
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Valid @RequestBody ReviewReplyRequest request
+    ) {
+        ReviewResponse response = reviewService.createOrUpdateReply(reviewId, principalDetails.user(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 리뷰 답글 삭제 API
+     * DELETE /api/reviews/{reviewId}/reply
+     */
+    @DeleteMapping("/reviews/{reviewId}/reply")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteReply(
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        reviewService.deleteReply(reviewId, principalDetails.user());
+        return ResponseEntity.noContent().build();
     }
 }
