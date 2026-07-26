@@ -172,4 +172,38 @@ public class OrderService {
                 .map(OrderSummaryResponse::from)
                 .toList();
     }
+
+    /**
+     * 주문 상태 변경 (JSON 바디 수신 형태 - ACCEPTED/REJECTED 매핑)
+     */
+    @Transactional
+    public void updateOrderStatusByBody(Long orderId, Long userId, String statusStr) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
+
+        Long storeOwnerId = order.getStore().getSellerProfile().getUser().getId();
+        if (!storeOwnerId.equals(userId)) {
+            throw new org.springframework.security.access.AccessDeniedException("본인 매장의 주문 상태만 변경할 수 있습니다.");
+        }
+
+        OrderStatus newStatus = mapStatus(statusStr);
+        order.updateStatus(newStatus);
+    }
+
+    private OrderStatus mapStatus(String input) {
+        if (input == null) throw new IllegalArgumentException("상태 값이 비어있습니다.");
+        String upper = input.toUpperCase().trim();
+        switch (upper) {
+            case "ACCEPTED":
+                return OrderStatus.IN_PROGRESS;
+            case "REJECTED":
+                return OrderStatus.CANCELED;
+            default:
+                try {
+                    return OrderStatus.valueOf(upper);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("알 수 없는 주문 상태입니다: " + input);
+                }
+        }
+    }
 }
