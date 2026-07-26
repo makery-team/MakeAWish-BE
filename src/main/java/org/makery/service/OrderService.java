@@ -11,6 +11,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.makery.dto.MessageDraftResponse;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -156,20 +161,77 @@ public class OrderService {
     }
 
     /**
-     * 주문 목록 조회
+     * 주문 목록 조회 (date 파라미터 지원: "today"일 경우 오늘 주문 필터링)
      */
-    public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role) {
+    public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role, String date) {
         List<Order> orders;
 
-        if (role == UserRole.ROLE_SELLER) {
-            // 💡 [수정 완료] 터지던 메서드 대신 새로 만든 리포지토리의 @Query 메서드 호출
-            orders = orderRepository.findAllBySellerId(userId);
+        if ("today".equalsIgnoreCase(date)) {
+            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+            LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+            if (role == UserRole.ROLE_SELLER) {
+                orders = orderRepository.findAllBySellerIdAndCreatedAtBetween(userId, startOfDay, endOfDay);
+            } else {
+                orders = orderRepository.findAllByUserIdAndCreatedAtBetween(userId, startOfDay, endOfDay);
+            }
         } else {
-            orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+            if (role == UserRole.ROLE_SELLER) {
+                orders = orderRepository.findAllBySellerId(userId);
+            } else {
+                orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+            }
         }
 
         return orders.stream()
                 .map(OrderSummaryResponse::from)
                 .toList();
+    }
+
+    /**
+     * 하위 호환성을 위한 기본 getMyOrders 메서드
+     */
+    public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role) {
+        return getMyOrders(userId, role, null);
+    }
+
+    /**
+     * (AI) 메시지 초안 생성
+     */
+    public MessageDraftResponse generateMessageDraft(Long orderId, Long userId) {
+        Order order = orderRepository.findDetailById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문 내역을 찾을 수 없습니다. ID: " + orderId));
+
+        Long storeOwnerId = order.getStore().getSellerProfile().getUser().getId();
+        if (!storeOwnerId.equals(userId)) {
+            throw new AccessDeniedException("본인 매장의 주문에 대한 메시지 초안만 생성할 수 있습니다.");
+        }
+
+        String customerName = (order.getUser() != null && order.getUser().getNickname() != null)
+                ? order.getUser().getNickname() : "고객";
+        String storeName = order.getStore().getName();
+        String orderNumber = order.getOrderNumber();
+        int totalPrice = order.getTotalPrice();
+
+        StringBuilder draft = new StringBuilder();
+        draft.append(String.format("안녕하세요 %s님, %s입니다! 💖\n\n", customerName, storeName));
+        draft.append(String.format("주문번호 [%s]의 주문 상태가 현재 '%s' 상태로 업데이트되었습니다.\n", orderNumber, order.getStatus()));
+        draft.append(String.format("총 금액: %,d원\n", totalPrice));
+
+        if (order.getExtraFee() != null && order.getExtraFee() > 0) {
+            draft.append(String.format("※ 추가 금액 (%,d원) 사유: %s\n", order.getExtraFee(), order.getExtraFeeReason()));
+        }
+
+        if (order.getPickupDate() != null) {
+            draft.append(String.format("픽업 예정 일시: %s\n", order.getPickupDate().toString().replace("T", " ")));
+        }
+
+        draft.append("\n정성껏 준비하여 안내해 드리겠습니다. 궁금하신 점이 있다면 언제든 문의해 주세요. 감사합니다! ✨");
+
+        return MessageDraftResponse.builder()
+                .orderId(order.getId())
+                .orderNumber(orderNumber)
+                .draftMessage(draft.toString())
+                .build();
     }
 }
