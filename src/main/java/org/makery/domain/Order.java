@@ -32,6 +32,13 @@ public class Order extends BaseEntity {
 
     private int totalPrice;
 
+    @Builder.Default
+    @Column(name = "extra_fee")
+    private Integer extraFee = 0;
+
+    @Column(name = "extra_fee_reason", columnDefinition = "TEXT")
+    private String extraFeeReason;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private Map<String, Object> orderData;
@@ -52,9 +59,12 @@ public class Order extends BaseEntity {
     private Payment payment;
 
     public void calculateTotalPrice() {
-        this.totalPrice = items.stream()
+        int basePrice = items.stream()
                 .mapToInt(item -> item.getUnitPrice() * item.getQuantity())
                 .sum();
+
+        int extra = (this.extraFee != null) ? this.extraFee : 0;
+        this.totalPrice = basePrice + extra;
     }
 
     public void updateStatus(OrderStatus newStatus) {
@@ -62,5 +72,17 @@ public class Order extends BaseEntity {
             throw new IllegalStateException("이미 종료된 주문은 상태를 변경할 수 없습니다.");
         }
         this.status = newStatus;
+    }
+
+    /**
+     * 추가금 반영 및 총액 재계산
+     */
+    public void updateExtraFee(int extraFee, String reason) {
+        int previousExtraFee = (this.extraFee != null) ? this.extraFee : 0;
+        int basePrice = this.totalPrice - previousExtraFee;
+
+        this.extraFee = extraFee;
+        this.extraFeeReason = reason;
+        this.totalPrice = basePrice + extraFee;
     }
 }
