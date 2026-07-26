@@ -1,23 +1,23 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE TABLE ai_agent_messages;
-TRUNCATE TABLE ai_inpainted_designs;
-TRUNCATE TABLE notifications;
-TRUNCATE TABLE likes;
-TRUNCATE TABLE portfolio_tags;
-TRUNCATE TABLE reviews;
-TRUNCATE TABLE order_items;
-TRUNCATE TABLE orders;
-TRUNCATE TABLE payments;
-TRUNCATE TABLE portfolios;
-TRUNCATE TABLE products;
-TRUNCATE TABLE categories;
-TRUNCATE TABLE stores;
-TRUNCATE TABLE seller_profiles;
-TRUNCATE TABLE tags;
-TRUNCATE TABLE users;
-TRUNCATE TABLE chat_room;
-TRUNCATE TABLE chat_message;
+DELETE FROM ai_agent_messages;
+DELETE FROM ai_inpainted_designs;
+DELETE FROM notifications;
+DELETE FROM likes;
+DELETE FROM portfolio_tags;
+DELETE FROM reviews;
+DELETE FROM order_items;
+DELETE FROM orders;
+DELETE FROM payments;
+DELETE FROM portfolios;
+DELETE FROM products;
+DELETE FROM categories;
+DELETE FROM stores;
+DELETE FROM seller_profiles;
+DELETE FROM tags;
+DELETE FROM users;
+DELETE FROM chat_room;
+DELETE FROM chat_message;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -53,7 +53,7 @@ INSERT INTO categories (id, name, store_id, created_at, modified_at) VALUES
 (4, '캐릭터 케이크', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (5, '2단 케이크', 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- 5. 제품 (Products) - 5개
+-- 5. 제품 (Products) - 5개 (JSON 키워드 제거)
 INSERT INTO products (id, name, price, description, is_available, order_schema, store_id, created_at, modified_at) VALUES
 (1, '커스텀 도시락 케이크', 18000, '간단한 선물용 미니 케이크', true, '{"type": "object", "properties": {"flavor": {"type": "string"}}}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, '프리미엄 포토 케이크', 35000, '식용 포토용지가 올라간 케이크', true, '{"type": "object", "properties": {"photoUrl": {"type": "string"}}}', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -92,7 +92,7 @@ INSERT INTO portfolio_tags (portfolio_id, tag_id) VALUES
 (6, 11), (6, 37), (6, 12), (6, 21), (6, 5), (6, 4), (6, 38), (6, 17), (6, 19), (6, 18),
 (7, 21), (7, 12), (7, 4), (7, 5), (7, 10), (7, 39), (7, 40), (7, 17), (7, 41);
 
--- 9. 주문 (Orders) - 총 7개 (1번 유저 3개, 2~5번 유저 각 1개)
+-- 9. 주문 (Orders) - 총 7개 (JSON 키워드 제거)
 INSERT INTO orders (id, order_number, status, pickup_date, total_price, order_data, user_id, store_id, created_at, modified_at) VALUES
 (1, 'ORD-20260604-001', 'COMPLETED', CURRENT_TIMESTAMP, 18000, '{"flavor": "초코"}', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 'ORD-20260604-002', 'PAID', CURRENT_TIMESTAMP, 35000, '{"photoUrl": "http"}', 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -102,7 +102,7 @@ INSERT INTO orders (id, order_number, status, pickup_date, total_price, order_da
 (6, 'ORD-20260604-006', 'PENDING_QUOTE', CURRENT_TIMESTAMP, 45000, '{"dogBreed": "비숑"}', 4, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (7, 'ORD-20260604-007', 'QUOTED', CURRENT_TIMESTAMP, 60000, '{"flowerColor": "핑크"}', 5, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- 10. 주문 항목 (OrderItems) - 주문과 1:1 매칭 (등록된 products, portfolios ID 참조)
+-- 10. 주문 항목 (OrderItems) - 주문과 1:1 매칭
 INSERT INTO order_items (id, name, quantity, unit_price, customized_image_url, order_id, product_id, portfolio_id) VALUES
 (1, '귀여운 강아지 케이크', 1, 18000, 'https://custom.image.url/1', 1, 1, 1),
 (2, '커플 포토 케이크', 1, 35000, NULL, 2, 2, 2),
@@ -146,11 +146,11 @@ INSERT INTO notifications (id, user_id, message, is_read, created_at) VALUES
 (4, 4, '견적서가 도착했습니다. 확인해주세요.', false, CURRENT_TIMESTAMP),
 (5, 5, '결제가 성공적으로 처리되었습니다.', true, CURRENT_TIMESTAMP);
 
--- 15. 채팅방 (ChatRooms) - 1개 (유저 1과 2번 유저 간의 방)
+-- 15. 채팅방 (ChatRooms) - 1개
 INSERT INTO chat_room (room_number, user_id, other_id, created_at, modified_at) VALUES
 (1, 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- 16. 채팅 메시지 (ChatMessages) - 5개 (유저 1, 2 간 대화, 이미지 제거)
+-- 16. 채팅 메시지 (ChatMessages) - 5개
 INSERT INTO chat_message (id, user_id, message, room_number, image_url, created_at, modified_at) VALUES
 (1, 2, '안녕하세요 사장님, 케이크 예약 문의드립니다.', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 1, '안녕하세요! 어드민 베이커리입니다. 어떤 디자인을 원하시나요?', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -158,19 +158,19 @@ INSERT INTO chat_message (id, user_id, message, room_number, image_url, created_
 (4, 1, '네, 가능합니다. 픽업 날짜와 시간은 언제가 좋으신가요?', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (5, 2, '이번 주 금요일 오후 5시에 방문하겠습니다!', 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- 시퀀스 초기화 (실제 삽입된 최고 ID 값의 다음 숫자로 깔끔하게 시작 지정)
-ALTER TABLE users AUTO_INCREMENT = 6;            -- 1~5 유저 등록 완료
-ALTER TABLE seller_profiles AUTO_INCREMENT = 6;  -- 1~5 프로필 등록 완료
-ALTER TABLE stores AUTO_INCREMENT = 6;           -- 1~5 매장 등록 완료
-ALTER TABLE categories AUTO_INCREMENT = 6;       -- 1~5 카테고리 등록 완료
-ALTER TABLE products AUTO_INCREMENT = 6;         -- 1~5 제품 등록 완료
-ALTER TABLE tags AUTO_INCREMENT = 42;            -- 1~41 태그 등록 완료
-ALTER TABLE portfolios AUTO_INCREMENT = 8;       -- 1~7 포트폴리오 등록 완료
-ALTER TABLE orders AUTO_INCREMENT = 8;           -- 1~7 주문 등록 완료
-ALTER TABLE order_items AUTO_INCREMENT = 8;      -- 1~7 주문 항목 등록 완료
-ALTER TABLE payments AUTO_INCREMENT = 8;         -- 1~7 결제 등록 완료
-ALTER TABLE reviews AUTO_INCREMENT = 6;          -- 1~5 리뷰 등록 완료
-ALTER TABLE likes AUTO_INCREMENT = 6;            -- 1~5 좋아요 등록 완료
-ALTER TABLE notifications AUTO_INCREMENT = 6;     -- 1~5 알림 등록 완료
-ALTER TABLE chat_room AUTO_INCREMENT = 2;        -- 1번 채팅방 등록 완료
-ALTER TABLE chat_message AUTO_INCREMENT = 6;     -- 1~5 채팅 메시지 등록 완료
+-- 시퀀스 초기화
+ALTER TABLE users AUTO_INCREMENT = 6;
+ALTER TABLE seller_profiles AUTO_INCREMENT = 6;
+ALTER TABLE stores AUTO_INCREMENT = 6;
+ALTER TABLE categories AUTO_INCREMENT = 6;
+ALTER TABLE products AUTO_INCREMENT = 6;
+ALTER TABLE tags AUTO_INCREMENT = 42;
+ALTER TABLE portfolios AUTO_INCREMENT = 8;
+ALTER TABLE orders AUTO_INCREMENT = 8;
+ALTER TABLE order_items AUTO_INCREMENT = 8;
+ALTER TABLE payments AUTO_INCREMENT = 8;
+ALTER TABLE reviews AUTO_INCREMENT = 6;
+ALTER TABLE likes AUTO_INCREMENT = 6;
+ALTER TABLE notifications AUTO_INCREMENT = 6;
+ALTER TABLE chat_room AUTO_INCREMENT = 2;
+ALTER TABLE chat_message AUTO_INCREMENT = 6;
