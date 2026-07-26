@@ -74,4 +74,23 @@ public class OrderController {
 
         return ResponseEntity.ok(responses);
     }
+
+    /**
+     * 주문 상태 변경 API (JSON 바디 수락/거절 등 수신)
+     * PATCH /api/orders/{orderId}
+     */
+    @PatchMapping("/{orderId}")
+    public ResponseEntity<Void> updateStatusByBody(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long orderId,
+            @RequestBody org.makery.dto.OrderStatusUpdateRequest request) {
+
+        orderService.updateOrderStatusByBody(
+                orderId,
+                principalDetails.user().getId(),
+                request.status()
+        );
+
+        return ResponseEntity.ok().build();
+    }
 }
