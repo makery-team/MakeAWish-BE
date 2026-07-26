@@ -20,6 +20,8 @@ public class ReviewResponse {
     private String imageUrl; // 케이크 사진
     private String storeName; // 매장 이름
     private LocalDateTime createdAt; // 작성일
+    private String replyContent;      // 답글 내용
+    private LocalDateTime replyCreatedAt; // 답글 작성일
 
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()
@@ -33,6 +35,8 @@ public class ReviewResponse {
                 .imageUrl(review.getImageUrl())
                 .storeName(review.getStore() != null ? review.getStore().getName() : null)
                 .createdAt(review.getCreatedAt())
+                .replyContent(review.getReplyContent())
+                .replyCreatedAt(review.getReplyCreatedAt())
                 .build();
     }
 }
