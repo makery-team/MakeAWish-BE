@@ -107,8 +107,7 @@ public class PortfolioService {
      * 포트폴리오 신규 등록
      */
     @Transactional
-    public void registerPortfolio(User seller, PortfolioRegisterRequest request) {
-        // [수정] DB 조회를 통해 LazyInitializationException 방지
+    public PortfolioResponse registerPortfolio(User seller, PortfolioRegisterRequest request) {
         Store store = storeRepository.findByUserId(seller.getId())
                 .orElseThrow(() -> new IllegalStateException("등록된 매장 정보가 없는 사장님 계정입니다. User ID: " + seller.getId()));
 
@@ -134,7 +133,9 @@ public class PortfolioService {
                 .isInpaintingAllowed(true)
                 .build();
 
-        portfolioRepository.save(portfolio);
+        Portfolio savedPortfolio = portfolioRepository.save(portfolio);
+
+        return PortfolioResponse.from(savedPortfolio);
     }
 
     /**
