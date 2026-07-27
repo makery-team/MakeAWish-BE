@@ -102,13 +102,13 @@ public class PortfolioController {
      * POST /api/portfolios
      */
     @PostMapping
-    public ResponseEntity<Void> registerPortfolio(
+    public ResponseEntity<PortfolioResponse> registerPortfolio(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Valid @RequestBody PortfolioRegisterRequest request) {
 
         User currentSeller = principalDetails.user();
-        portfolioService.registerPortfolio(currentSeller, request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        PortfolioResponse response = portfolioService.registerPortfolio(currentSeller, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
