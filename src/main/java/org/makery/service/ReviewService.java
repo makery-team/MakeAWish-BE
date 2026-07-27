@@ -41,6 +41,8 @@ public class ReviewService {
 
     /**
      * 2. [신규] 특정 주문/포트폴리오 기반 리뷰(댓글) 작성
+     * TODO(BACKEND-TECH-DEBT): 리뷰 등록/수정/삭제 시 매장(Store)의 rating(평균 별점) 및 reviewCount(총 리뷰 수)를
+     * 실시간으로 집계(AVG/COUNT 쿼리 또는 비동기 배치)하여 Store 엔티티를 업데이트하는 로직 구현 필요
      */
     @Transactional
     public ReviewResponse createReview(Long orderId, User user, ReviewRequest request) {
