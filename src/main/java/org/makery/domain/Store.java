@@ -27,6 +27,12 @@ public class Store extends BaseEntity {
     @Column(length = 1000)
     private String description;
 
+    @Column(length = 500)
+    private String address;
+
+    @Column(length = 50)
+    private String phone;
+
     private String hours;
     private String notice; // 사장님 한마디/공지
 
