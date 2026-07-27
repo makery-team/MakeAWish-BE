@@ -29,3 +29,8 @@
 | 작성일자 | 문서명 | 핵심 주제 및 해결 내용 |
 | :---: | :--- | :--- |
 | **2026-07-27** | [`2026-07-27_postmortem_aws_rds_mysql_deployment_failure.md`](./2026-07-27_postmortem_aws_rds_mysql_deployment_failure.md) | **AWS Elastic Beanstalk / RDS MySQL 실서버 배포 장애(502/500/403 에러) 최종 분석 리포트**<br>• 1차 원인: `DatabaseFixConfig.java` 중복 제약조건 실행과 예외 래핑(`BadSqlGrammarException`)으로 인한 서버 구동 크래시(502 에러)<br>• 2차 원인: `data.sql` 내 `TRUNCATE TABLE` 사용으로 RDS MySQL 외래키 제약조건(Error 1701) 충돌<br>• **결정적 원인:** `SecurityConfig.java` 내 `.requestMatchers(toH2Console())`가 비-H2 실서버 환경에서 예외를 일으켜 500/403 에러 발생 (주석 처리로 완벽 해결) |
+
+### 🏗️ 시스템 아키텍처 및 데이터 명세 (`arch_`)
+| 작성일자 | 문서명 | 핵심 주제 |
+| :---: | :--- | :--- |
+| **2026-07-27** | [`2026-07-27_arch_store_operating_hours_specification.md`](./2026-07-27_arch_store_operating_hours_specification.md) | **매장 요일별 운영시간 명세(Option A JSON String) 및 리뷰 데이터 무결성 아키텍처** |
