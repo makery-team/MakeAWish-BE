@@ -3,6 +3,7 @@ package org.makery.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.PrincipalDetails;
+import org.makery.dto.ReviewAiSummaryResponse;
 import org.makery.dto.ReviewReplyRequest;
 import org.makery.dto.ReviewRequest;
 import org.makery.dto.ReviewResponse;
@@ -128,5 +129,15 @@ public class ReviewController {
     ) {
         reviewService.deleteReply(reviewId, principalDetails.user());
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 특정 매장 리뷰 요약 조회 API
+     * GET /api/stores/{storeId}/reviews/summary
+     */
+    @GetMapping("/{storeId}/reviews/summary")
+    public ResponseEntity<ReviewAiSummaryResponse> getStoreReviewSummary(@PathVariable Long storeId) {
+        ReviewAiSummaryResponse response = reviewService.getStoreReviewSummary(storeId);
+        return ResponseEntity.ok(response);
     }
 }

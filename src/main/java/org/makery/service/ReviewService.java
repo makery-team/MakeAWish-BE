@@ -6,6 +6,7 @@ import org.makery.domain.Order;
 import org.makery.domain.Review;
 import org.makery.domain.Store;
 import org.makery.domain.User;
+import org.makery.dto.ReviewAiSummaryResponse;
 import org.makery.dto.ReviewReplyRequest;
 import org.makery.dto.ReviewRequest;
 import org.makery.dto.ReviewResponse;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,6 +29,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final StoreRepository storeRepository;
+    private final AiClient aiClient;
 
     /**
      * 1. 기존 매장별 리뷰 목록 조회 (보존)
@@ -142,5 +146,46 @@ public class ReviewService {
         }
 
         review.deleteReply();
+    }
+
+    /**
+     * 특정 매장의 전체 리뷰를 조회하여 AI 요약 반환
+     */
+    public ReviewAiSummaryResponse getStoreReviewSummary(Long storeId) {
+        // 1. 매장 존재 여부 검증
+        if (!storeRepository.existsById(storeId)) {
+            throw new EntityNotFoundException("존재하지 않는 매장입니다. ID: " + storeId);
+        }
+
+        // 2. 해당 매장의 리뷰 목록 조회
+        List<Review> reviews = reviewRepository.findByStoreId(storeId);
+
+        // 리뷰가 없는 경우 기본 응답 반환
+        if (reviews.isEmpty()) {
+            return ReviewAiSummaryResponse.builder()
+                    .storeId(storeId)
+                    .totalReviewCount(0)
+                    .summary("아직 등록된 리뷰가 없습니다.")
+                    .positivePoints(List.of())
+                    .negativePoints(List.of())
+                    .build();
+        }
+
+        // 3. 리뷰 텍스트만 추출
+        List<String> reviewContents = reviews.stream()
+                .map(Review::getContent)
+                .toList();
+
+        // 4. AI 서버 호출하여 요약 데이터 수신
+        ReviewAiSummaryResponse aiResult = aiClient.getReviewSummary(reviewContents);
+
+        // 5. 응답 데이터 조립 반환
+        return ReviewAiSummaryResponse.builder()
+                .storeId(storeId)
+                .totalReviewCount(reviews.size())
+                .summary(aiResult.getSummary())
+                .positivePoints(aiResult.getPositivePoints())
+                .negativePoints(aiResult.getNegativePoints())
+                .build();
     }
 }

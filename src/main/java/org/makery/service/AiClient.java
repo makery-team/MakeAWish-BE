@@ -5,6 +5,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+import java.util.Map;
+
 @FeignClient(name = "ai-analysis-service", url = "${ai.server.url}")
 public interface AiClient {
 
@@ -18,4 +21,13 @@ public interface AiClient {
     // 이미지 URL 기반 AI 태그 추천 API
     @PostMapping("/api/ai/generate-tags")
     AiTagResponse generateTags(@RequestBody AiTagRequest request);
+
+    @PostMapping("/api/ai/reviews/summary")
+    ReviewAiSummaryResponse getReviewSummary(@RequestBody List<String> reviews);
+
+    @PostMapping("/api/ai/stores/profile-suggest")
+    StoreAiProfileSuggestResponse suggestProfileImprovement(@RequestBody Map<String, Object> storeData);
+
+    @PostMapping("/api/ai/stores/generate-bio")
+    StoreAiBioGenerateResponse generateBio(@RequestBody Map<String, String> requestData);
 }
