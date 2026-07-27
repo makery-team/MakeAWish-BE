@@ -5,7 +5,7 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: none # update, create
+      ddl-auto: update # update, create
     defer-datasource-initialization: true
 
   # 로컬 테스트용

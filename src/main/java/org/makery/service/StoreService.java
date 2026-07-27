@@ -9,6 +9,7 @@ import org.makery.domain.User;
 import org.makery.dto.*;
 import org.makery.repository.ProductRepository; // 💡 ProductRepository 주입 필요
 import org.makery.repository.StoreRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +60,37 @@ public class StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 상품(카테고리)을 찾을 수 없습니다. ID: " + productId));
 
         // 💡 이제 OrderSchemaResponse.from()은 Product를 인자로 받습니다.
+        return OrderSchemaResponse.from(product);
+    }
+
+    /**
+     * 주문서 양식(스키마) 생성 및 수정 (사장님 권한)
+     */
+    @Transactional
+    public OrderSchemaResponse createOrUpdateOrderSchema(Long storeId, OrderSchemaSaveRequest request, User currentSeller) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 매장을 찾을 수 없습니다. ID: " + storeId));
+
+        if (store.getSellerProfile() == null || !store.getSellerProfile().getUser().getId().equals(currentSeller.getId())) {
+            throw new AccessDeniedException("본인 매장의 주문서 양식만 수정할 수 있습니다.");
+        }
+
+        Product product;
+        if (request.productId() != null) {
+            product = productRepository.findById(request.productId())
+                    .orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다. ID: " + request.productId()));
+            if (!product.getStore().getId().equals(storeId)) {
+                throw new IllegalArgumentException("해당 매장의 상품이 아닙니다.");
+            }
+        } else {
+            // 매장의 첫 번째 상품 또는 대표 상품의 스키마 업데이트
+            if (store.getProducts().isEmpty()) {
+                throw new IllegalStateException("매장에 등록된 상품이 없어 양식을 생성할 수 없습니다.");
+            }
+            product = store.getProducts().get(0);
+        }
+
+        product.setOrderSchema(request.orderSchema());
         return OrderSchemaResponse.from(product);
     }
 

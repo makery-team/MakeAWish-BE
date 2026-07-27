@@ -84,6 +84,32 @@ public class StoreController {
     }
 
     /**
+     * 매장별 주문서 양식(스키마) 생성 API
+     * POST /api/stores/{storeId}/order-schema
+     */
+    @PostMapping("/stores/{storeId}/order-schema")
+    public ResponseEntity<OrderSchemaResponse> createOrderSchema(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable("storeId") Long storeId,
+            @RequestBody OrderSchemaSaveRequest request) {
+        OrderSchemaResponse response = storeService.createOrUpdateOrderSchema(storeId, request, principalDetails.user());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 매장별 주문서 양식(템플릿) 수정 API
+     * PATCH /api/stores/{storeId}/order-template
+     */
+    @PatchMapping("/stores/{storeId}/order-template")
+    public ResponseEntity<OrderSchemaResponse> updateOrderTemplate(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable("storeId") Long storeId,
+            @RequestBody OrderSchemaSaveRequest request) {
+        OrderSchemaResponse response = storeService.createOrUpdateOrderSchema(storeId, request, principalDetails.user());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * 매장 프로필 정보 수정
      * PATCH /api/stores/profile
      */
