@@ -5,11 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.makery.domain.PrincipalDetails;
 import org.makery.domain.Store;
 import org.makery.domain.User;
-import org.makery.dto.OrderSchemaResponse;
-import org.makery.dto.OrderSchemaSaveRequest;
-import org.makery.dto.PortfolioResponse;
-import org.makery.dto.StoreProfileUpdateRequest;
-import org.makery.dto.StoreResponse;
+import org.makery.dto.*;
 import org.makery.service.PortfolioService;
 import org.makery.service.StoreService;
 import org.springframework.data.domain.Page;
@@ -125,5 +121,28 @@ public class StoreController {
         User currentSeller = principalDetails.user();
         storeService.updateStoreProfile(currentSeller, request);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 프로필 개선 제안 요청
+     * GET /api/stores/ai/profile-suggest
+     */
+    @GetMapping("/profile-suggest")
+    public ResponseEntity<StoreAiProfileSuggestResponse> suggestProfileImprovement(
+            @AuthenticationPrincipal User seller
+    ) {
+        return ResponseEntity.ok(storeService.suggestProfileImprovement(seller));
+    }
+
+    /**
+     * 소개글 자동 생성
+     * POST /api/stores/ai/generate-bio
+     */
+    @PostMapping("/generate-bio")
+    public ResponseEntity<StoreAiBioGenerateResponse> generateBio(
+            @AuthenticationPrincipal User seller,
+            @RequestBody StoreAiBioGenerateRequest request
+    ) {
+        return ResponseEntity.ok(storeService.generateBio(seller, request));
     }
 }

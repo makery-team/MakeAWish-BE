@@ -45,4 +45,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "JOIN o.items oi " +
             "WHERE oi.portfolio.id = :portfolioId")
     List<Review> findByPortfolioId(@Param("portfolioId") Long portfolioId);
+
+    List<Review> findByStoreId(Long storeId);
 }
