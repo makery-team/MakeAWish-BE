@@ -39,7 +39,7 @@ INSERT INTO seller_profiles (id, business_no, bank_account, status, user_id, cre
 
 -- 3. 매장 (Stores) - 5개
 INSERT INTO stores (id, name, description, address, phone, hours, notice, caution_notice, latitude, longitude, rating, review_count, seller_profile_id, created_at, modified_at) VALUES
-(1, '어드민 베이커리', '정성을 담아 만듭니다.', '서울 마포구 연남동 239-20 1층', '02-332-1004', '10:00-20:00', '휴무일은 인스타 공지', '견과류 알러지 주의', 37.5665, 126.9780, 5.0, 2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, '어드민 베이커리', '정성을 담아 만듭니다.', '서울 마포구 연남동 239-20 1층', '02-332-1004', '{"mon":"09:00 - 20:00", "tue":"09:00 - 20:00", "wed":"09:00 - 20:00", "thu":"09:00 - 20:00", "fri":"09:00 - 20:00", "sat":"10:00 - 18:00", "sun":"휴무"}', '휴무일은 인스타 공지', '견과류 알러지 주의', 37.5665, 126.9780, 5.0, 2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, '달콤달콤 케이크', '특별한 날을 더 특별하게', '서울 강남구 테헤란로 123 2층', '02-555-0123', '11:00-21:00', '당일 예약 불가', '유제품 알러지 주의', 37.5651, 126.9895, 5.0, 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (3, '위시 케이크', '원하는 디자인 모두 가능!', '서울 성동구 서울숲2길 14', '02-466-7890', '12:00-22:00', '리뷰 이벤트 진행중', '색소 주의', 37.5511, 126.9882, 4.5, 2, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (4, '해피 베이킹', '수제 레터링 전문', '서울 송파구 올림픽로 300 1층', '02-411-2345', '09:00-19:00', '주말은 오전 픽업만', '알러지 성분 없음', 37.5412, 127.0392, 5.0, 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
