@@ -14,6 +14,8 @@ public class StoreResponse {
     private Long id;
     private String name;
     private String description;
+    private String address;
+    private String phone;
     private String hours;
     private String notice;
     private String cautionNotice; // 💡 추가된 매장 공통 주의사항
@@ -30,6 +32,8 @@ public class StoreResponse {
                 .id(store.getId())
                 .name(store.getName())
                 .description(store.getDescription())
+                .address(store.getAddress())
+                .phone(store.getPhone())
                 .hours(store.getHours())
                 .notice(store.getNotice())
                 .cautionNotice(store.getCautionNotice())
