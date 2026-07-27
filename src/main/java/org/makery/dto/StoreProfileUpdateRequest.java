@@ -12,6 +12,8 @@ public class StoreProfileUpdateRequest {
     private String name;
 
     private String description;
+    private String address;
+    private String phone;
     private String hours;
     private String notice;
     private String cautionNotice; // 알러지 및 주의사항 안내문

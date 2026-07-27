@@ -38,12 +38,12 @@ INSERT INTO seller_profiles (id, business_no, bank_account, status, user_id, cre
 (5, '555-66-77777', '카카오뱅크 3333-01-1234567', 'PENDING', 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 3. 매장 (Stores) - 5개
-INSERT INTO stores (id, name, description, hours, notice, caution_notice, latitude, longitude, rating, review_count, seller_profile_id, created_at, modified_at) VALUES
-(1, '어드민 베이커리', '정성을 담아 만듭니다.', '10:00-20:00', '휴무일은 인스타 공지', '견과류 알러지 주의', 37.5665, 126.9780, 4.8, 150, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(2, '달콤달콤 케이크', '특별한 날을 더 특별하게', '11:00-21:00', '당일 예약 불가', '유제품 알러지 주의', 37.5651, 126.9895, 4.5, 85, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(3, '위시 케이크', '원하는 디자인 모두 가능!', '12:00-22:00', '리뷰 이벤트 진행중', '색소 주의', 37.5511, 126.9882, 4.9, 210, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(4, '해피 베이킹', '수제 레터링 전문', '09:00-19:00', '주말은 오전 픽업만', '알러지 성분 없음', 37.5412, 127.0392, 4.7, 95, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(5, '러블리 디저트', '귀여운 도시락 케이크 전문', '10:00-18:00', '예약은 최소 3일 전', '글루텐 프리 옵션 가능', 37.5211, 126.9242, 4.6, 120, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO stores (id, name, description, address, phone, hours, notice, caution_notice, latitude, longitude, rating, review_count, seller_profile_id, created_at, modified_at) VALUES
+(1, '어드민 베이커리', '정성을 담아 만듭니다.', '서울 마포구 연남동 239-20 1층', '02-332-1004', '{"mon":"09:00 - 20:00", "tue":"09:00 - 20:00", "wed":"09:00 - 20:00", "thu":"09:00 - 20:00", "fri":"09:00 - 20:00", "sat":"10:00 - 18:00", "sun":"휴무"}', '휴무일은 인스타 공지', '견과류 알러지 주의', 37.5665, 126.9780, 5.0, 2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, '달콤달콤 케이크', '특별한 날을 더 특별하게', '서울 강남구 테헤란로 123 2층', '02-555-0123', '11:00-21:00', '당일 예약 불가', '유제품 알러지 주의', 37.5651, 126.9895, 5.0, 1, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, '위시 케이크', '원하는 디자인 모두 가능!', '서울 성동구 서울숲2길 14', '02-466-7890', '12:00-22:00', '리뷰 이벤트 진행중', '색소 주의', 37.5511, 126.9882, 4.5, 2, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, '해피 베이킹', '수제 레터링 전문', '서울 송파구 올림픽로 300 1층', '02-411-2345', '09:00-19:00', '주말은 오전 픽업만', '알러지 성분 없음', 37.5412, 127.0392, 5.0, 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, '러블리 디저트', '귀여운 도시락 케이크 전문', '서울 용산구 이태원로 150 2층', '02-790-5678', '10:00-18:00', '예약은 최소 3일 전', '글루텐 프리 옵션 가능', 37.5211, 126.9242, 5.0, 1, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 4. 매장 카테고리 (Categories) - 5개
 INSERT INTO categories (id, name, store_id, created_at, modified_at) VALUES
@@ -122,13 +122,15 @@ INSERT INTO payments (id, amount, status, method_type, order_id, created_at, mod
 (6, 45000, 'READY', 'KAKAOPAY', 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (7, 60000, 'READY', 'CARD', 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- 12. 리뷰 (Reviews) - 5개
+-- 12. 리뷰 (Reviews) - 7개
 INSERT INTO reviews (id, content, image_url, rating, store_id, order_id, created_at, modified_at) VALUES
-(1, '강아지가 너무 귀여워요! 맛도 최고입니다.', 'https://review.img/1', 5, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(2, '포토 화질이 진짜 좋아요 ㅠㅠ 감동!', 'https://review.img/2', 5, 2, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(1, '강아지가 너무 귀여워요! 맛도 최고입니다.', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80', 5, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, '포토 화질이 진짜 좋아요 ㅠㅠ 감동!', 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?w=600&auto=format&fit=crop&q=80', 5, 2, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (3, '레터링 글씨체가 예쁩니다.', NULL, 4, 3, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(4, '도시락 케이크 가성비 짱짱', 'https://review.img/4', 5, 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(5, '퇴사하는 분이 엄청 좋아하셨어요 ㅋㅋ', NULL, 5, 3, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(4, '도시락 케이크 가성비 짱짱', 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=600&auto=format&fit=crop&q=80', 5, 1, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, '퇴사하는 분이 엄청 좋아하셨어요 ㅋㅋ', NULL, 5, 3, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(6, '입체 강아지 케이크 너무 귀여워요 강추!', 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=600&auto=format&fit=crop&q=80', 5, 4, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(7, '생일 파티 분위기 제대로 살렸습니다 최고!!', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&auto=format&fit=crop&q=80', 5, 5, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 13. 좋아요 (Likes) - 5개
 INSERT INTO likes (id, user_id, portfolio_id, created_at, modified_at) VALUES
