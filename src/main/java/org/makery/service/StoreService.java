@@ -1,13 +1,12 @@
 package org.makery.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.Product; // 💡 Product 임포트 추가
 import org.makery.domain.SellerProfile;
 import org.makery.domain.Store;
 import org.makery.domain.User;
-import org.makery.dto.OrderSchemaResponse;
-import org.makery.dto.OrderSchemaSaveRequest;
-import org.makery.dto.StoreProfileUpdateRequest;
+import org.makery.dto.*;
 import org.makery.repository.ProductRepository; // 💡 ProductRepository 주입 필요
 import org.makery.repository.StoreRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
+    private final AiClient aiClient;
 
     /**
      * 1. 매장 검색 및 전체 조회 (기존 유지)
@@ -106,5 +107,41 @@ public class StoreService {
         store.setHours(request.getHours());
         store.setNotice(request.getNotice());
         store.setCautionNotice(request.getCautionNotice());
+    }
+
+    /**
+     * 프로필 개선 제안 요청
+     */
+    public StoreAiProfileSuggestResponse suggestProfileImprovement(User seller) {
+        Store store = getSellerStore(seller);
+
+        Map<String, Object> storeData = Map.of(
+                "storeName", store.getName(),
+                "description", store.getDescription() != null ? store.getDescription() : "",
+                "notice", store.getNotice() != null ? store.getNotice() : "",
+                "cautionNotice", store.getCautionNotice() != null ? store.getCautionNotice() : ""
+        );
+
+        return aiClient.suggestProfileImprovement(storeData);
+    }
+
+    /**
+     * 소개글 자동 생성
+     */
+    public StoreAiBioGenerateResponse generateBio(User seller, StoreAiBioGenerateRequest request) {
+        Store store = getSellerStore(seller);
+
+        Map<String, String> requestData = Map.of(
+                "storeName", store.getName(),
+                "keywords", request.keywords() != null ? request.keywords() : "",
+                "concept", request.concept() != null ? request.concept() : ""
+        );
+
+        return aiClient.generateBio(requestData);
+    }
+
+    private Store getSellerStore(User seller) {
+        return storeRepository.findByUserId(seller.getId())
+                .orElseThrow(() -> new EntityNotFoundException("등록된 매장 정보가 없는 사장님 계정입니다. User ID: " + seller.getId()));
     }
 }
