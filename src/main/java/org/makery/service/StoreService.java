@@ -104,6 +104,8 @@ public class StoreService {
 
         store.setName(request.getName());
         store.setDescription(request.getDescription());
+        store.setAddress(request.getAddress());
+        store.setPhone(request.getPhone());
         store.setHours(request.getHours());
         store.setNotice(request.getNotice());
         store.setCautionNotice(request.getCautionNotice());
