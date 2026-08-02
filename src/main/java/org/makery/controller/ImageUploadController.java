@@ -15,13 +15,9 @@ public class ImageUploadController {
 
     private final S3UploadService s3UploadService;
 
-    /**
-     * 이미지 파일 단건 업로드 API
-     * POST /api/images/upload
-     */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImageUploadResponse> uploadImage(
-            @RequestPart("file") MultipartFile file
+            @RequestParam("file") MultipartFile file
     ) {
         String imageUrl = s3UploadService.uploadImage(file);
         return ResponseEntity.ok(new ImageUploadResponse(imageUrl));
