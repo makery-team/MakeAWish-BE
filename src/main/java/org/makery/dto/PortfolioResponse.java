@@ -11,6 +11,7 @@ import java.util.List;
 public record PortfolioResponse(
         Long portfolioId,
         Long storeId,
+        String storeName,
         String title,
         String description,
         String imageUrl,
@@ -23,6 +24,7 @@ public record PortfolioResponse(
         return PortfolioResponse.builder()
                 .portfolioId(portfolio.getId())
                 .storeId(portfolio.getStore() != null ? portfolio.getStore().getId() : null)
+                .storeName(portfolio.getStore() != null ? portfolio.getStore().getName() : null)
                 .title(portfolio.getTitle())
                 .description(portfolio.getDescription())
                 .imageUrl(portfolio.getImageUrl())
