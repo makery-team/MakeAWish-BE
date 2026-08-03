@@ -67,4 +67,10 @@ public class User extends BaseEntity {
     public void assignRole(UserRole userRole) {
         this.userRole = userRole;
     }
+
+    public void registerAsSeller(SellerProfile sellerProfile) {
+        this.userRole = UserRole.ROLE_SELLER;
+        this.sellerProfile = sellerProfile;
+        sellerProfile.setUser(this); // 양방향 연관관계 설정 (SellerProfile에 setUser 필요)
+    }
 }

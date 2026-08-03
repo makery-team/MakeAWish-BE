@@ -2,9 +2,7 @@ package org.makery.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.makery.domain.Language;
-import org.makery.domain.User;
-import org.makery.domain.UserRole;
+import org.makery.domain.*;
 import org.makery.dto.*;
 import org.makery.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -83,19 +81,59 @@ public class UserService {
     @Transactional
     public void initUserProfile(Long userId, UserProfileInitRequest req) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + userId));
 
-        // 1. 닉네임 중복 체크
-        if (userRepository.existsByNickname(req.nickname())) {
-            throw new IllegalStateException("이미 사용 중인 닉네임입니다.");
+        // 1. 닉네임 중복 체크 (본인 기존 닉네임과 다른 경우에만 검사)
+        if (req.nickname() != null && !req.nickname().equals(user.getNickname())) {
+            if (userRepository.existsByNickname(req.nickname())) {
+                throw new IllegalStateException("이미 사용 중인 닉네임입니다.");
+            }
         }
 
-        // 2. 프로필 정보 업데이트
+        // 2. 기본 프로필 정보 업데이트
         user.updateProfile(req.nickname(), req.phoneNumber(), req.language());
 
-        // 3. 권한 승격 (GUEST -> ROLE_USER)
-        // 소셜 로그인 직후 'GUEST' 권한이었던 사용자를 실제 서비스 이용이 가능한 'ROLE_USER'로 변경합니다.
-        user.assignRole(UserRole.ROLE_USER);
+        // 3. 사장님 앱 가입 요청인 경우 (isSeller == true)
+        if (req.checkIsSeller()) {
+
+            // 이미 SellerProfile을 보유하고 있는지 체크 (중복 생성 방지)
+            if (user.getSellerProfile() == null) {
+
+                // A. SellerProfile 신규 생성
+                SellerProfile sellerProfile = SellerProfile.builder()
+                        .businessNo(null)
+                        .bankAccount(null)
+                        .status(SellerStatus.VERIFIED)
+                        .build();
+
+                // B. 기본 매장(Store) 신규 생성
+                Store defaultStore = Store.builder()
+                        .name(req.nickname() + "의 매장")
+                        .phone(req.phoneNumber())
+                        .description(null)
+                        .address(null)
+                        .hours(null)
+                        .notice(null)
+                        .cautionNotice(null)
+                        .latitude(null)
+                        .longitude(null)
+                        .rating(0.0)
+                        .reviewCount(0)
+                        .build();
+
+                // C. 연관관계 3종 매핑
+                sellerProfile.addStore(defaultStore);
+                user.registerAsSeller(sellerProfile);
+
+            } else {
+                // 이미 사장님 프로필이 존재하는 경우, 권한만 ROLE_SELLER 확인/보장
+                user.assignRole(UserRole.ROLE_SELLER);
+            }
+
+        } else {
+            // 일반 구매자 회원인 경우 ROLE_USER 부여
+            user.assignRole(UserRole.ROLE_USER);
+        }
     }
 
     @Transactional

@@ -12,5 +12,12 @@ public record UserProfileInitRequest(
         String phoneNumber,
 
         @NotNull(message = "언어 설정은 필수입니다.")
-        Language language
-) {}
+        Language language,
+
+        Boolean isSeller
+) {
+        // isSeller가 null로 들어올 경우 기본값 false 반환
+        public boolean checkIsSeller() {
+                return isSeller != null && isSeller;
+        }
+}
