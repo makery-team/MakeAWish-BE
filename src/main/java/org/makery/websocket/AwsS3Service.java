@@ -1,7 +1,6 @@
 package org.makery.websocket;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -16,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64; // ★ Base64 디코딩을 위해 추가
+import java.util.Base64;
 import java.util.UUID;
 
 @Service
@@ -30,7 +29,7 @@ public class AwsS3Service {
     private final RestTemplate restTemplate;
 
     /**
-     * 🌟 [추가됨] AI 서버가 웹훅으로 보낸 결과물(Base64 텍스트)을 S3에 직접 업로드합니다.
+     * AI 서버가 웹훅으로 보낸 결과물(Base64 텍스트)을 S3에 직접 업로드
      */
     public String uploadFromBase64(String base64Data) {
         if (base64Data == null || base64Data.isBlank()) {
@@ -38,28 +37,23 @@ public class AwsS3Service {
         }
 
         try {
-            // 1. Data URL 접두사(data:image/jpeg;base64,)가 붙어있을 경우 순수 Base64 문자열만 추출
             String pureBase64 = base64Data;
             if (base64Data.contains(",")) {
                 pureBase64 = base64Data.split(",")[1];
             }
 
-            // 2. Base64 문자열을 진짜 바이트(이진 데이터) 배열로 디코딩
             byte[] imageBytes = Base64.getDecoder().decode(pureBase64);
             InputStream inputStream = new ByteArrayInputStream(imageBytes);
 
-            // 3. 파일 이름 및 메타데이터 정의 (고유한 UUID 기반 저장)
             String fileName = "inpainted/" + UUID.randomUUID().toString() + ".jpg";
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(imageBytes.length);
-            metadata.setContentType("image/jpeg"); // AI 서버 출력 양식(JPEG)에 일치시킴
+            metadata.setContentType("image/jpeg");
 
-            // 4. AWS S3 실제 퍼블릭 업로드 실행
-            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            // 💡 .withCannedAcl(...) 제거하여 S3 ACL 거부 에러 방지
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata));
 
-            // 5. 영구 보관된 실제 S3 URL 경로 반환
             return amazonS3.getUrl(bucket, fileName).toString();
 
         } catch (IllegalArgumentException e) {
@@ -74,7 +68,6 @@ public class AwsS3Service {
      */
     public String uploadFromUrl(String imageUrl) {
         try {
-            // 1. 이미지 URL에서 데이터 다운로드
             byte[] imageBytes = restTemplate.getForObject(imageUrl, byte[].class);
             if (imageBytes == null) {
                 throw new RuntimeException("이미지 다운로드에 실패했습니다.");
@@ -83,16 +76,13 @@ public class AwsS3Service {
 
             String fileName = "inpainted/" + UUID.randomUUID().toString() + ".png";
 
-            // 2. 메타데이터 설정 (필수)
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(imageBytes.length);
             metadata.setContentType("image/png");
 
-            // 3. 실제 S3 업로드 실행
-            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            // 💡 .withCannedAcl(...) 제거
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata));
 
-            // 4. 업로드된 실제 S3 URL 반환
             return amazonS3.getUrl(bucket, fileName).toString();
 
         } catch (Exception e) {
@@ -100,7 +90,14 @@ public class AwsS3Service {
         }
     }
 
+    /**
+     * 일반 멀티파트 파일 업로드
+     */
     public String uploadFile(MultipartFile multipartFile) {
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "업로드할 파일이 존재하지 않습니다.");
+        }
+
         String fileName = createFileName(multipartFile.getOriginalFilename());
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -108,10 +105,10 @@ public class AwsS3Service {
         objectMetadata.setContentType(multipartFile.getContentType());
 
         try (InputStream inputStream = multipartFile.getInputStream()) {
-            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            // 💡 .withCannedAcl(...) 제거
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, objectMetadata));
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.", e);
         }
 
         return amazonS3.getUrl(bucket, fileName).toString();
@@ -122,6 +119,9 @@ public class AwsS3Service {
     }
 
     private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return ".png"; // 기본 확장자 지정
+        }
         try {
             return fileName.substring(fileName.lastIndexOf("."));
         } catch (StringIndexOutOfBoundsException e) {
@@ -143,7 +143,6 @@ public class AwsS3Service {
     }
 
     private String extractFileNameFromUrl(String url) {
-        // URL의 마지막 '/' 이후 부분을 파일명으로 추출
         int lastSlashIndex = url.lastIndexOf('/');
         if (lastSlashIndex == -1 || lastSlashIndex == url.length() - 1) {
             return null;
