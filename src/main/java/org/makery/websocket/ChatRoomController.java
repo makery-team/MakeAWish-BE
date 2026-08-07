@@ -39,10 +39,10 @@ public class ChatRoomController {
         if (optionalChatRoom.isPresent()) {
             ChatRoom foundChatRoom = optionalChatRoom.get();
             List<ChatMessageResponseDto> messages = chatMessageService.findMessages(foundChatRoom.getRoomNumber());
-            return ResponseEntity.ok(new ChatRoomWithMessagesDto(foundChatRoom, messages));
+            return ResponseEntity.ok(new ChatRoomWithMessagesDto(foundChatRoom, messages, user.getId()));
         } else {
             ChatRoom newChatRoom = chatRoomService.createRoom(user, other);
-            return ResponseEntity.ok(new ChatRoomWithMessagesDto(newChatRoom, new ArrayList<>()));
+            return ResponseEntity.ok(new ChatRoomWithMessagesDto(newChatRoom, new ArrayList<>(), user.getId()));
         }
     }
 

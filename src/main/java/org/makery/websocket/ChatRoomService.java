@@ -52,7 +52,7 @@ public class ChatRoomService {
         return rooms.stream()
                 .map(room -> {
                     List<ChatMessageResponseDto> messages = chatMessageService.findMessages(room.getRoomNumber());
-                    return new ChatRoomWithMessagesDto(room, messages);
+                    return new ChatRoomWithMessagesDto(room, messages, userId);
                 })
                 .collect(Collectors.toList());
     }

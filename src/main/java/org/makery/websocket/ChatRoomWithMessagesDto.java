@@ -13,11 +13,17 @@ public class ChatRoomWithMessagesDto {
     private final String otherName;
     private final List<ChatMessageResponseDto> messages;
 
-    public ChatRoomWithMessagesDto(ChatRoom chatRoom, List<ChatMessageResponseDto> messages) {
+    public ChatRoomWithMessagesDto(ChatRoom chatRoom, List<ChatMessageResponseDto> messages, Long requestUserId) {
         this.roomNumber = chatRoom.getRoomNumber();
-        this.userId = chatRoom.getUser().getId();
-        this.otherId = chatRoom.getOther().getId();
-        this.otherName = chatRoom.getOther().getNickname() != null ? chatRoom.getOther().getNickname() : chatRoom.getOther().getName();
+        if (chatRoom.getUser().getId().equals(requestUserId)) {
+            this.userId = requestUserId;
+            this.otherId = chatRoom.getOther().getId();
+            this.otherName = chatRoom.getOther().getNickname() != null ? chatRoom.getOther().getNickname() : chatRoom.getOther().getName();
+        } else {
+            this.userId = requestUserId;
+            this.otherId = chatRoom.getUser().getId();
+            this.otherName = chatRoom.getUser().getNickname() != null ? chatRoom.getUser().getNickname() : chatRoom.getUser().getName();
+        }
         this.messages = messages;
     }
 }
