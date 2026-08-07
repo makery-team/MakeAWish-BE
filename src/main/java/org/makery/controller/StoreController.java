@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/stores") // 💡 /api/stores 로 통일
 @RequiredArgsConstructor
 public class StoreController {
 
@@ -28,10 +28,22 @@ public class StoreController {
     private final PortfolioService portfolioService;
 
     /**
-     * 1. 매장 목록 조회 (통합 API)
-     * 일반 검색 또는 지도 기반 반경 조회
+     * 내 매장 정보 조회 API
+     * GET /api/stores/me
      */
-    @GetMapping("/stores")
+    @GetMapping("/me")
+    public ResponseEntity<MyStoreResponse> getMyStore(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        MyStoreResponse response = storeService.getMyStore(principalDetails.user().getId());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 1. 매장 목록 조회 (통합 API)
+     * GET /api/stores
+     */
+    @GetMapping
     public ResponseEntity<List<StoreResponse>> getStores(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Double lat,
@@ -54,19 +66,21 @@ public class StoreController {
 
     /**
      * 2. 매장 상세 조회 API
+     * GET /api/stores/{storeId}
      */
-    @GetMapping("/stores/{storeId}")
-    public ResponseEntity<StoreResponse> getStoreDetail(@PathVariable Long storeId) {
+    @GetMapping("/{storeId}")
+    public ResponseEntity<StoreResponse> getStoreDetail(@PathVariable("storeId") Long storeId) {
         Store store = storeService.getStoreById(storeId);
         return ResponseEntity.ok(StoreResponse.from(store));
     }
 
     /**
      * 3. 매장별 포트폴리오 목록 조회 API (페이징)
+     * GET /api/stores/{storeId}/portfolios
      */
-    @GetMapping("/stores/{storeId}/portfolios")
+    @GetMapping("/{storeId}/portfolios")
     public ResponseEntity<Page<PortfolioResponse>> getStorePortfolios(
-            @PathVariable Long storeId,
+            @PathVariable("storeId") Long storeId,
             @PageableDefault(size = 12, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<PortfolioResponse> portfolios = portfolioService.getPortfoliosByStore(storeId, pageable);
@@ -77,7 +91,7 @@ public class StoreController {
      * 매장별 주문서 양식(스키마) 조회 API
      * GET /api/stores/{storeId}/order-schema
      */
-    @GetMapping("/stores/{storeId}/order-schema")
+    @GetMapping("/{storeId}/order-schema")
     public ResponseEntity<OrderSchemaResponse> getOrderSchema(@PathVariable("storeId") Long storeId) {
         OrderSchemaResponse response = storeService.getOrderSchema(storeId);
         return ResponseEntity.ok(response);
@@ -87,7 +101,7 @@ public class StoreController {
      * 매장별 주문서 양식(스키마) 생성 API
      * POST /api/stores/{storeId}/order-schema
      */
-    @PostMapping("/stores/{storeId}/order-schema")
+    @PostMapping("/{storeId}/order-schema")
     public ResponseEntity<OrderSchemaResponse> createOrderSchema(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable("storeId") Long storeId,
@@ -100,7 +114,7 @@ public class StoreController {
      * 매장별 주문서 양식(템플릿) 수정 API
      * PATCH /api/stores/{storeId}/order-template
      */
-    @PatchMapping("/stores/{storeId}/order-template")
+    @PatchMapping("/{storeId}/order-template")
     public ResponseEntity<OrderSchemaResponse> updateOrderTemplate(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable("storeId") Long storeId,
@@ -113,7 +127,7 @@ public class StoreController {
      * 매장 프로필 정보 수정
      * PATCH /api/stores/profile
      */
-    @PatchMapping("/stores/profile")
+    @PatchMapping("/profile")
     public ResponseEntity<Void> updateStoreProfile(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Valid @RequestBody StoreProfileUpdateRequest request) {
@@ -127,22 +141,22 @@ public class StoreController {
      * 프로필 개선 제안 요청
      * GET /api/stores/ai/profile-suggest
      */
-    @GetMapping("/profile-suggest")
+    @GetMapping("/ai/profile-suggest")
     public ResponseEntity<StoreAiProfileSuggestResponse> suggestProfileImprovement(
-            @AuthenticationPrincipal User seller
+            @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        return ResponseEntity.ok(storeService.suggestProfileImprovement(seller));
+        return ResponseEntity.ok(storeService.suggestProfileImprovement(principalDetails.user()));
     }
 
     /**
      * 소개글 자동 생성
      * POST /api/stores/ai/generate-bio
      */
-    @PostMapping("/generate-bio")
+    @PostMapping("/ai/generate-bio")
     public ResponseEntity<StoreAiBioGenerateResponse> generateBio(
-            @AuthenticationPrincipal User seller,
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody StoreAiBioGenerateRequest request
     ) {
-        return ResponseEntity.ok(storeService.generateBio(seller, request));
+        return ResponseEntity.ok(storeService.generateBio(principalDetails.user(), request));
     }
 }
