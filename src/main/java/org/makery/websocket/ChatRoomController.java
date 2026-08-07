@@ -58,6 +58,14 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRooms);
     }
 
+    // 특정 채팅방의 메시지 내역 조회
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/chatting/rooms/{roomNumber}/messages")
+    public ResponseEntity<List<ChatMessageResponseDto>> getChatHistory(@PathVariable Long roomNumber) {
+        List<ChatMessageResponseDto> messages = chatMessageService.findMessages(roomNumber);
+        return ResponseEntity.ok(messages);
+    }
+
     //채팅방 삭제
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/chatting/rooms/{roomNumber}")
