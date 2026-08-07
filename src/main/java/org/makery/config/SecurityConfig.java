@@ -70,7 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/ai-agent/**").authenticated()
                         .requestMatchers("/api/token", "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/stores/me").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**", "/api/tags/**").permitAll()
                         .requestMatchers("/chatting/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
