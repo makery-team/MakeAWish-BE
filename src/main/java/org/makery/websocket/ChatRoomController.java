@@ -20,6 +20,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
     private final UserService userService;
+    private final org.makery.repository.StoreRepository storeRepository;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/chatting/room")
@@ -28,8 +29,10 @@ public class ChatRoomController {
         // 1. 현재 로그인 유저를 DB에서 다시 조회 (영속 상태 보장)
         User user = userService.findById(principalUser.user().getId());
 
-        // 2. 상대 유저도 조회
-        User other = userService.findById(chatRoomRequestDto.getOtherId());
+        // 2. 상대 유저도 조회 (매장 ID를 통해 사장님 유저 찾기)
+        org.makery.domain.Store store = storeRepository.findById(chatRoomRequestDto.getStoreId())
+                .orElseThrow(() -> new IllegalArgumentException("Store not found"));
+        User other = store.getSellerProfile().getUser();
 
         Optional<ChatRoom> optionalChatRoom = chatRoomService.findByUserAndOther(user, other);
 

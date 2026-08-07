@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 public class ChatRoomRequestDto {
 
     private Long userId;
-    private Long otherId;
+    private Long storeId; // 매장 ID (프론트에서 전달)
 }
