@@ -68,13 +68,13 @@ public class PortfolioService {
     /**
      * 무한 스크롤 홈 피드 태그 필터 (정렬 옵션 추가)
      */
-    public Slice<PortfolioFeedResponse> searchFeedByTags(List<String> tags, String sort, Pageable pageable) {
+    public Slice<PortfolioFeedResponse> searchFeedByTags(List<String> tags, String sortType, Pageable pageable) {
         if (tags == null || tags.isEmpty()) {
-            return getFeed(sort, pageable);
+            return getFeed(sortType, pageable);
         }
 
         Long tagCount = (long) tags.size();
-        if ("latest".equalsIgnoreCase(sort)) {
+        if ("latest".equalsIgnoreCase(sortType)) {
             return portfolioRepository.findByTagsOrderByCreatedAtDesc(tags, tagCount, pageable)
                     .map(PortfolioFeedResponse::from);
         } else {
@@ -86,8 +86,8 @@ public class PortfolioService {
     /**
      * 피드 조회 (최신순 또는 인기순)
      */
-    public Slice<PortfolioFeedResponse> getFeed(String sort, Pageable pageable) {
-        if ("latest".equalsIgnoreCase(sort)) {
+    public Slice<PortfolioFeedResponse> getFeed(String sortType, Pageable pageable) {
+        if ("latest".equalsIgnoreCase(sortType)) {
             return portfolioRepository.findAllByOrderByCreatedAtDesc(pageable)
                     .map(PortfolioFeedResponse::from);
         } else {

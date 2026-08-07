@@ -54,10 +54,10 @@ public class PortfolioController {
     @GetMapping("/feeds")
     public ResponseEntity<Slice<PortfolioFeedResponse>> searchFeedByTags(
             @RequestParam(name = "tags", required = false) List<String> tags,
-            @RequestParam(name = "sort", defaultValue = "latest") String sort,
+            @RequestParam(name = "sortType", defaultValue = "latest") String sortType,
             @PageableDefault(size = 12) Pageable pageable) {
 
-        return ResponseEntity.ok(portfolioService.searchFeedByTags(tags, sort, pageable));
+        return ResponseEntity.ok(portfolioService.searchFeedByTags(tags, sortType, pageable));
     }
 
     // 3. 포트폴리오 좋아요 추가
