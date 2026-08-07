@@ -46,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer configure() {
         return (web) -> web.ignoring()
-                //.requestMatchers(toH2Console())
+//                .requestMatchers(toH2Console())
                 .requestMatchers("/img/**", "/css/**", "/js/**");
     }
 
@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/ai-agent/webhook/**").permitAll()
                         .requestMatchers("/api/ai-agent/**").authenticated()
                         .requestMatchers("/api/token", "/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/stores/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**").permitAll()
                         .requestMatchers("/chatting/**").authenticated()
                         .requestMatchers("/api/**").authenticated()

@@ -38,4 +38,9 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
             "JOIN s.sellerProfile sp " +
             "WHERE sp.user.id = :userId")
     Optional<Store> findByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT s FROM Store s " +
+            "JOIN s.sellerProfile sp " +
+            "WHERE sp.user.id = :userId")
+    Optional<Store> findBySellerProfileUserId(@Param("userId") Long userId);
 }

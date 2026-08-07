@@ -146,4 +146,15 @@ public class StoreService {
         return storeRepository.findByUserId(seller.getId())
                 .orElseThrow(() -> new EntityNotFoundException("등록된 매장 정보가 없는 사장님 계정입니다. User ID: " + seller.getId()));
     }
+
+    /**
+     * 내 매장 정보 조회
+     */
+    @Transactional(readOnly = true)
+    public MyStoreResponse getMyStore(Long userId) {
+        Store store = storeRepository.findBySellerProfileUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 매장 정보를 찾을 수 없습니다. userId: " + userId));
+
+        return MyStoreResponse.from(store);
+    }
 }
