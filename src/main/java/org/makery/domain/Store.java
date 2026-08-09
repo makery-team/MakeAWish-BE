@@ -33,7 +33,9 @@ public class Store extends BaseEntity {
     @Column(length = 50)
     private String phone;
 
+    @Column(columnDefinition = "TEXT")
     private String hours;
+    
     private String notice; // 사장님 한마디/공지
 
     /**
