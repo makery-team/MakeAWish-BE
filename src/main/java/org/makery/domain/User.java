@@ -73,4 +73,17 @@ public class User extends BaseEntity {
         this.sellerProfile = sellerProfile;
         sellerProfile.setUser(this); // 양방향 연관관계 설정 (SellerProfile에 setUser 필요)
     }
+
+    /**
+     * 회원 탈퇴 (소프트 삭제 / 개인정보 마스킹)
+     * unique 제약 조건 충돌 방지를 위해 id값을 결합하여 마스킹 처리합니다.
+     */
+    public void withdraw() {
+        this.email = "deleted_" + this.id + "@withdrawn.com";
+        this.nickname = "탈퇴회원_" + this.id;
+        this.name = "탈퇴회원";
+        this.password = null;
+        this.phoneNumber = null;
+        this.userRole = UserRole.ROLE_GUEST; // 필요 시 권한 변경
+    }
 }
