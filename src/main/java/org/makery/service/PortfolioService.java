@@ -9,6 +9,7 @@ import org.makery.repository.ProductRepository;
 import org.makery.repository.StoreRepository;
 import org.makery.repository.TagRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -65,24 +66,41 @@ public class PortfolioService {
     }
 
     /**
-     * 최신순 피드 조회
+     * 무한 스크롤 홈 피드 태그 필터 (정렬 옵션 추가)
      */
-    public Slice<PortfolioFeedResponse> getFeed(Pageable pageable) {
-        return portfolioRepository.findAllByOrderByCreatedAtDesc(pageable)
-                .map(PortfolioFeedResponse::from); // Portfolio -> PortfolioFeedResponse 변환
-    }
-
-    /**
-     * 태그 기반 피드 조회
-     */
-    public Slice<PortfolioFeedResponse> searchFeedByTags(List<String> tags, Pageable pageable) {
+    public Slice<PortfolioFeedResponse> searchFeedByTags(List<String> tags, String sortType, Pageable pageable) {
         if (tags == null || tags.isEmpty()) {
-            return getFeed(pageable); // 태그가 없으면 기본 피드 반환
+            return getFeed(sortType, pageable);
         }
 
         Long tagCount = (long) tags.size();
-        return portfolioRepository.findByTags(tags, tagCount, pageable)
-                .map(PortfolioFeedResponse::from);
+        if ("latest".equalsIgnoreCase(sortType)) {
+            return portfolioRepository.findByTagsOrderByCreatedAtDesc(tags, tagCount, pageable)
+                    .map(PortfolioFeedResponse::from);
+        } else {
+            return portfolioRepository.findByTagsOrderByLikeCountDesc(tags, tagCount, pageable)
+                    .map(PortfolioFeedResponse::from);
+        }
+    }
+
+    /**
+     * 피드 조회 (최신순 또는 인기순)
+     */
+    public Slice<PortfolioFeedResponse> getFeed(String sortType, Pageable pageable) {
+        if ("latest".equalsIgnoreCase(sortType)) {
+            return portfolioRepository.findAllByOrderByCreatedAtDesc(pageable)
+                    .map(PortfolioFeedResponse::from);
+        } else {
+            return portfolioRepository.findAllByOrderByLikeCountDesc(pageable)
+                    .map(PortfolioFeedResponse::from);
+        }
+    }
+
+    /**
+     * 트렌딩 태그 상위 N개 조회
+     */
+    public List<String> getTrendingTags(int limit) {
+        return portfolioRepository.findTrendingTagNames(PageRequest.of(0, limit));
     }
 
     // ==========================================

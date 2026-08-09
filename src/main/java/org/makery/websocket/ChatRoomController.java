@@ -20,6 +20,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
     private final UserService userService;
+    private final org.makery.repository.StoreRepository storeRepository;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/chatting/room")
@@ -28,18 +29,20 @@ public class ChatRoomController {
         // 1. 현재 로그인 유저를 DB에서 다시 조회 (영속 상태 보장)
         User user = userService.findById(principalUser.user().getId());
 
-        // 2. 상대 유저도 조회
-        User other = userService.findById(chatRoomRequestDto.getOtherId());
+        // 2. 상대 유저도 조회 (매장 ID를 통해 사장님 유저 찾기)
+        org.makery.domain.Store store = storeRepository.findById(chatRoomRequestDto.getStoreId())
+                .orElseThrow(() -> new IllegalArgumentException("Store not found"));
+        User other = store.getSellerProfile().getUser();
 
         Optional<ChatRoom> optionalChatRoom = chatRoomService.findByUserAndOther(user, other);
 
         if (optionalChatRoom.isPresent()) {
             ChatRoom foundChatRoom = optionalChatRoom.get();
             List<ChatMessageResponseDto> messages = chatMessageService.findMessages(foundChatRoom.getRoomNumber());
-            return ResponseEntity.ok(new ChatRoomWithMessagesDto(foundChatRoom, messages));
+            return ResponseEntity.ok(new ChatRoomWithMessagesDto(foundChatRoom, messages, user.getId()));
         } else {
             ChatRoom newChatRoom = chatRoomService.createRoom(user, other);
-            return ResponseEntity.ok(new ChatRoomWithMessagesDto(newChatRoom, new ArrayList<>()));
+            return ResponseEntity.ok(new ChatRoomWithMessagesDto(newChatRoom, new ArrayList<>(), user.getId()));
         }
     }
 
@@ -53,6 +56,14 @@ public class ChatRoomController {
 
         List<ChatRoomWithMessagesDto> chatRooms = chatRoomService.findByUserId(userId);
         return ResponseEntity.ok(chatRooms);
+    }
+
+    // 특정 채팅방의 메시지 내역 조회
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/chatting/rooms/{roomNumber}/messages")
+    public ResponseEntity<List<ChatMessageResponseDto>> getChatHistory(@PathVariable Long roomNumber) {
+        List<ChatMessageResponseDto> messages = chatMessageService.findMessages(roomNumber);
+        return ResponseEntity.ok(messages);
     }
 
     //채팅방 삭제

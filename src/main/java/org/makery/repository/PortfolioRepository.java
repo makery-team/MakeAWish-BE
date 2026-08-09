@@ -21,14 +21,34 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     @Query("select p from Portfolio p join fetch p.store join fetch p.tags")
     Slice<Portfolio> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
+    @Query("select p from Portfolio p join fetch p.store join fetch p.tags order by p.likeCount desc")
+    Slice<Portfolio> findAllByOrderByLikeCountDesc(Pageable pageable);
+
     @Query("select p from Portfolio p " +
             "join p.tags t " +
             "where t.name in :tagNames " +
             "group by p.id " +
-            "having count(t.id) = :tagCount")
-    Slice<Portfolio> findByTags(@Param("tagNames") List<String> tagNames,
-                                @Param("tagCount") Long tagCount,
-                                Pageable pageable);
+            "having count(t.id) = :tagCount " +
+            "order by p.createdAt desc")
+    Slice<Portfolio> findByTagsOrderByCreatedAtDesc(@Param("tagNames") List<String> tagNames,
+                                                    @Param("tagCount") Long tagCount,
+                                                    Pageable pageable);
+
+    @Query("select p from Portfolio p " +
+            "join p.tags t " +
+            "where t.name in :tagNames " +
+            "group by p.id " +
+            "having count(t.id) = :tagCount " +
+            "order by p.likeCount desc")
+    Slice<Portfolio> findByTagsOrderByLikeCountDesc(@Param("tagNames") List<String> tagNames,
+                                                    @Param("tagCount") Long tagCount,
+                                                    Pageable pageable);
+
+    @Query("SELECT t.name FROM Portfolio p " +
+            "JOIN p.tags t " +
+            "GROUP BY t.name " +
+            "ORDER BY COUNT(p.id) DESC")
+    List<String> findTrendingTagNames(Pageable pageable);
 
     /**
      * AI 에이전트 추천용: 태그 리스트에 포함된 포트폴리오를 중복 없이 조회

@@ -108,7 +108,7 @@ public class UserService {
 
                 // B. 기본 매장(Store) 신규 생성
                 Store defaultStore = Store.builder()
-                        .name(req.nickname() + "의 매장")
+                        .name(req.nickname())
                         .phone(req.phoneNumber())
                         .description(null)
                         .address(null)
