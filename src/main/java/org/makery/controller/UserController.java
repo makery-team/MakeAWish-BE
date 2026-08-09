@@ -83,6 +83,18 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 회원 탈퇴 API
+     * DELETE /api/users/me
+     */
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> withdraw(
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        userService.withdraw(principalDetails.user());
+        return ResponseEntity.noContent().build(); // 204 No Content 반환
+    }
+
     // ---------------------------------------------------------
     // 내 찜(좋아요) 목록 조회 기능
 

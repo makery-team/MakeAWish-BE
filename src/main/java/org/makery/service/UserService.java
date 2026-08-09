@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.makery.domain.*;
 import org.makery.dto.*;
+import org.makery.repository.RefreshTokenRepository;
 import org.makery.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * 이메일로 사용자 조회
@@ -150,5 +152,21 @@ public class UserService {
 
         // 비즈니스 메서드를 호출하여 정보 수정
         user.updateProfile(req.nickname(), req.phoneNumber(), req.language());
+    }
+
+    /**
+     * 회원 탈퇴 처리
+     */
+    @Transactional
+    public void withdraw(User user) {
+        // 1. 유저 존재 검증
+        User targetUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다. ID: " + user.getId()));
+
+        // 2. 발급된 Refresh Token 삭제 (로그아웃 처리 효과)
+        refreshTokenRepository.deleteByUserId(targetUser.getId());
+
+        // 3. 유저 엔티티 삭제 (JPA Cascade 설정에 따라 연관 데이터 함께 처리)
+        userRepository.delete(targetUser);
     }
 }
