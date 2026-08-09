@@ -124,7 +124,15 @@ public class StoreService {
                 "cautionNotice", store.getCautionNotice() != null ? store.getCautionNotice() : ""
         );
 
-        return aiClient.suggestProfileImprovement(storeData);
+        // 1. AI 클라이언트로부터 결과 수신
+        StoreAiProfileSuggestResponse aiResult = aiClient.suggestProfileImprovement(storeData);
+
+        // 2. storeId를 채워서 새로운 응답 객체로 반환
+        return new StoreAiProfileSuggestResponse(
+                store.getId(), // 💡 storeId 바인딩
+                aiResult.overallFeedback(),
+                aiResult.suggestions()
+        );
     }
 
     /**
