@@ -118,10 +118,8 @@ public class UserService {
                         .notice("")
                         .rating(0.0)
                         .reviewCount(0)
-                        .user(user) // 양방향 연관관계 세팅 (단방향이면 불필요할 수 있음)
+                        // .user(user) <-- Store는 SellerProfile을 가지므로 이건 제거
                         .build();
-
-                storeRepository.save(defaultStore);
 
                 // C. 기본 상품 카테고리(Product) 신규 생성 (포트폴리오 업로드 시 필수)
                 org.makery.domain.Product defaultProduct = org.makery.domain.Product.builder()
@@ -131,10 +129,9 @@ public class UserService {
                         .store(defaultStore)
                         .build();
                 
-                org.makery.repository.ProductRepository productRepository = org.springframework.web.context.support.WebApplicationContextUtils.getRequiredWebApplicationContext(((org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()).getRequest().getServletContext()).getBean(org.makery.repository.ProductRepository.class);
-                productRepository.save(defaultProduct);
+                defaultStore.getProducts().add(defaultProduct);
 
-                // C. 연관관계 3종 매핑
+                // C. 연관관계 3종 매핑 (storeRepository 없이 영속성 전이(Cascade)로 저장되도록 유도)
                 sellerProfile.addStore(defaultStore);
                 user.registerAsSeller(sellerProfile);
 
