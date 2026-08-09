@@ -130,14 +130,4 @@ public class ReviewController {
         reviewService.deleteReply(reviewId, principalDetails.user());
         return ResponseEntity.noContent().build();
     }
-
-    /**
-     * 특정 매장 리뷰 요약 조회 API
-     * GET /api/stores/{storeId}/reviews/summary
-     */
-    @GetMapping("/{storeId}/reviews/summary")
-    public ResponseEntity<ReviewAiSummaryResponse> getStoreReviewSummary(@PathVariable Long storeId) {
-        ReviewAiSummaryResponse response = reviewService.getStoreReviewSummary(storeId);
-        return ResponseEntity.ok(response);
-    }
 }

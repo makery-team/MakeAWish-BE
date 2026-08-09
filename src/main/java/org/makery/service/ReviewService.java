@@ -6,10 +6,7 @@ import org.makery.domain.Order;
 import org.makery.domain.Review;
 import org.makery.domain.Store;
 import org.makery.domain.User;
-import org.makery.dto.ReviewAiSummaryResponse;
-import org.makery.dto.ReviewReplyRequest;
-import org.makery.dto.ReviewRequest;
-import org.makery.dto.ReviewResponse;
+import org.makery.dto.*;
 import org.makery.repository.OrderRepository;
 import org.makery.repository.ReviewRepository;
 import org.makery.repository.StoreRepository;
@@ -162,7 +159,6 @@ public class ReviewService {
         // 2. 해당 매장의 리뷰 목록 조회
         List<Review> reviews = reviewRepository.findByStoreId(storeId);
 
-        // 리뷰가 없는 경우 기본 응답 반환
         if (reviews.isEmpty()) {
             return ReviewAiSummaryResponse.builder()
                     .storeId(storeId)
@@ -173,15 +169,16 @@ public class ReviewService {
                     .build();
         }
 
-        // 3. 리뷰 텍스트만 추출
+        // 3. 리뷰 텍스트 추출
         List<String> reviewContents = reviews.stream()
                 .map(Review::getContent)
                 .toList();
 
-        // 4. AI 서버 호출하여 요약 데이터 수신
-        ReviewAiSummaryResponse aiResult = aiClient.getReviewSummary(reviewContents);
+        // 4. AI 서비스 호출
+        AiReviewSummaryRequest request = new AiReviewSummaryRequest(reviewContents);
+        ReviewAiSummaryResponse aiResult = aiClient.getReviewSummary(request);
 
-        // 5. 응답 데이터 조립 반환
+        // 5. 응답 조립 및 반환
         return ReviewAiSummaryResponse.builder()
                 .storeId(storeId)
                 .totalReviewCount(reviews.size())

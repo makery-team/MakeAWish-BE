@@ -37,14 +37,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @EntityGraph(attributePaths = {"store", "order", "order.user"})
     Slice<Review> findByOrderUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
-    /**
-     * 특정 포트폴리오(디자인 샘플)를 참고하여 주문(OrderItem)하고 달린 리뷰들을 역추적하여 조회
-     */
-    @Query("SELECT r FROM Review r " +
-            "JOIN r.order o " +
-            "JOIN o.items oi " +
-            "WHERE oi.portfolio.id = :portfolioId")
-    List<Review> findByPortfolioId(@Param("portfolioId") Long portfolioId);
+    @Query("SELECT r.content FROM Review r WHERE r.store.id = :storeId")
+    List<String> findContentsByStoreId(@Param("storeId") Long storeId);
 
     List<Review> findByStoreId(Long storeId);
 }

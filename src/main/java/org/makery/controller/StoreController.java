@@ -7,6 +7,7 @@ import org.makery.domain.Store;
 import org.makery.domain.User;
 import org.makery.dto.*;
 import org.makery.service.PortfolioService;
+import org.makery.service.ReviewService;
 import org.makery.service.StoreService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class StoreController {
 
     private final StoreService storeService;
     private final PortfolioService portfolioService;
+    private final ReviewService reviewService;
 
     /**
      * 내 매장 정보 조회 API
@@ -158,5 +160,16 @@ public class StoreController {
             @RequestBody StoreAiBioGenerateRequest request
     ) {
         return ResponseEntity.ok(storeService.generateBio(principalDetails.user(), request));
+    }
+
+
+    /**
+     * 특정 매장 리뷰 요약 조회 API
+     * GET /api/stores/{storeId}/reviews/summary
+     */
+    @GetMapping("/{storeId}/reviews/summary")
+    public ResponseEntity<ReviewAiSummaryResponse> getStoreReviewSummary(@PathVariable Long storeId) {
+        ReviewAiSummaryResponse response = reviewService.getStoreReviewSummary(storeId);
+        return ResponseEntity.ok(response);
     }
 }

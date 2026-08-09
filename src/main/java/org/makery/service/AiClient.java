@@ -23,7 +23,7 @@ public interface AiClient {
     AiTagResponse generateTags(@RequestBody AiTagRequest request);
 
     @PostMapping("/api/ai/reviews/summary")
-    ReviewAiSummaryResponse getReviewSummary(@RequestBody List<String> reviews);
+    ReviewAiSummaryResponse getReviewSummary(@RequestBody AiReviewSummaryRequest request);
 
     @PostMapping("/api/ai/stores/profile-suggest")
     StoreAiProfileSuggestResponse suggestProfileImprovement(@RequestBody Map<String, Object> storeData);
