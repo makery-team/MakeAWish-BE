@@ -159,14 +159,14 @@ public class UserService {
      */
     @Transactional
     public void withdraw(User user) {
-        // 1. 유저 존재 검증
+        // 1. 유저 조회
         User targetUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다. ID: " + user.getId()));
 
-        // 2. 발급된 Refresh Token 삭제 (로그아웃 처리 효과)
+        // 2. 발급된 Refresh Token만 삭제 (재로그인 방지)
         refreshTokenRepository.deleteByUserId(targetUser.getId());
 
-        // 3. 유저 엔티티 삭제 (JPA Cascade 설정에 따라 연관 데이터 함께 처리)
-        userRepository.delete(targetUser);
+        // 3. 유저 정보 익명화/비활성화 (Dirty Checking으로 자동 DB UPDATE)
+        targetUser.withdraw();
     }
 }
