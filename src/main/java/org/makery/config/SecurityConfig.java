@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/check-nickname/**").permitAll()
                         .requestMatchers("/api/ai-agent/webhook/**").permitAll()
                         .requestMatchers("/api/ai-agent/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
                         .requestMatchers("/api/token", "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/stores/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/portfolios/**", "/api/stores/**", "/api/tags/**").permitAll()
