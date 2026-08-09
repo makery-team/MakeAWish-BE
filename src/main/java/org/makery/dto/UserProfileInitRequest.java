@@ -14,6 +14,7 @@ public record UserProfileInitRequest(
         @NotNull(message = "언어 설정은 필수입니다.")
         Language language,
 
+        @com.fasterxml.jackson.annotation.JsonProperty("isSeller")
         Boolean isSeller
 ) {
         // isSeller가 null로 들어올 경우 기본값 false 반환
