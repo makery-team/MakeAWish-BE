@@ -12,10 +12,13 @@ import org.makery.repository.StoreRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,6 +27,10 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
     private final AiClient aiClient;
+    private final KakaoLocalClient kakaoLocalClient;
+
+    @Value("${kakao.rest.api.key:}")
+    private String kakaoRestApiKey;
 
     /**
      * 1. 매장 검색 및 전체 조회 (기존 유지)
@@ -109,6 +116,39 @@ public class StoreService {
         store.setHours(request.getHours());
         store.setNotice(request.getNotice());
         store.setCautionNotice(request.getCautionNotice());
+
+        if (request.getLatitude() != null && request.getLongitude() != null) {
+            store.setLatitude(request.getLatitude());
+            store.setLongitude(request.getLongitude());
+        } else if (request.getAddress() != null && !request.getAddress().isBlank()) {
+            geocodeAndSetCoordinates(store, request.getAddress());
+        }
+    }
+
+    private void geocodeAndSetCoordinates(Store store, String address) {
+        if (kakaoRestApiKey == null || kakaoRestApiKey.isBlank()) {
+            log.warn("Kakao REST API Key is missing. Skipping geocoding for address: {}", address);
+            return;
+        }
+
+        try {
+            String authorization = "KakaoAK " + kakaoRestApiKey;
+            Map<String, Object> response = kakaoLocalClient.searchAddress(authorization, address);
+            
+            if (response != null && response.containsKey("documents")) {
+                List<Map<String, Object>> documents = (List<Map<String, Object>>) response.get("documents");
+                if (!documents.isEmpty()) {
+                    Map<String, Object> firstDoc = documents.get(0);
+                    if (firstDoc.containsKey("y") && firstDoc.containsKey("x")) {
+                        store.setLatitude(Double.parseDouble(firstDoc.get("y").toString()));
+                        store.setLongitude(Double.parseDouble(firstDoc.get("x").toString()));
+                        log.info("Geocoded address '{}' to lat: {}, lng: {}", address, store.getLatitude(), store.getLongitude());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to geocode address: {}", address, e);
+        }
     }
 
     /**
