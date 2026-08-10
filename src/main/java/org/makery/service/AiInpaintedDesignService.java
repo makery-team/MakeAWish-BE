@@ -67,11 +67,15 @@ public class AiInpaintedDesignService {
 
         // 2. AI 서버에 전송할 비동기 연동 DTO 생성 (웹훅 도메인 조립)
         String webhookUrl = backendBaseUrl + "/api/ai-agent/webhook/inpaint";
+        
+        String cleanReferenceB64 = extractPureBase64(request.referenceImage());
+        
         InpaintingAiAsyncRequest aiRequest = new InpaintingAiAsyncRequest(
                 request.prompt(),
                 imageUrl,
                 imageB64,
                 cleanMaskB64,
+                cleanReferenceB64,
                 pendingDesign.getId(),
                 webhookUrl
         );
