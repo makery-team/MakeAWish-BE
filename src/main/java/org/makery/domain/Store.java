@@ -47,6 +47,9 @@ public class Store extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String cautionNotice;
 
+    @Column(length = 200)
+    private String keywords; // 매장 핵심 키워드 (소개글 생성 및 검색 시 활용)
+
     private Double latitude;
     private Double longitude;
 

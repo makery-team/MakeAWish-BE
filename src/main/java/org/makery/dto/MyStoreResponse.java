@@ -21,6 +21,7 @@ public class MyStoreResponse {
     private String hours;
     private String notice;
     private String cautionNotice;
+    private String keywords;
     private Double rating;
     private Integer reviewCount;
     private Double latitude;
@@ -37,6 +38,7 @@ public class MyStoreResponse {
                 .hours(store.getHours())
                 .notice(store.getNotice())
                 .cautionNotice(store.getCautionNotice())
+                .keywords(store.getKeywords())
                 .rating(store.getRating())
                 .reviewCount(store.getReviewCount())
                 .latitude(store.getLatitude())
