@@ -109,13 +109,7 @@ public class StoreService {
         Store store = storeRepository.findByUserId(seller.getId())
                 .orElseThrow(() -> new IllegalStateException("등록된 매장 정보가 없는 사장님 계정입니다. User ID: " + seller.getId()));
 
-        store.setName(request.getName());
-        store.setDescription(request.getDescription());
-        store.setAddress(request.getAddress());
-        store.setPhone(request.getPhone());
-        store.setHours(request.getHours());
-        store.setNotice(request.getNotice());
-        store.setCautionNotice(request.getCautionNotice());
+        store.updateProfile(request);
 
         if (request.getLatitude() != null && request.getLongitude() != null) {
             store.setLatitude(request.getLatitude());
