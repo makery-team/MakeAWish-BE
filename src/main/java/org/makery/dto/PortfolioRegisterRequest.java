@@ -19,5 +19,7 @@ public class PortfolioRegisterRequest {
     @NotNull(message = "상위 제품(카테고리) ID는 필수입니다.")
     private Long productId;
 
+    private Boolean isInpaintingAllowed;
+
     private List<String> tags; // 최초 등록 시 함께 포함할 태그 목록 (AI 추천 태그 등)
 }
