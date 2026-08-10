@@ -3,6 +3,7 @@ package org.makery.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.makery.client.AiClient;
 import org.makery.domain.AiInpaintedDesign;
 import org.makery.domain.InpaintingStatus;
 import org.makery.domain.Portfolio;

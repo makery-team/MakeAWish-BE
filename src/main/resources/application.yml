@@ -66,3 +66,7 @@ cloud:
 ai:
   server:
     url: ${AI_SERVER_URL}
+
+toss:
+  payments:
+    secret-key: ${TOSS_SECRET_KEY}
