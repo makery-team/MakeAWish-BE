@@ -177,7 +177,7 @@ public class StoreService {
 
         Map<String, String> requestData = Map.of(
                 "storeName", store.getName(),
-                "keywords", request.keywords() != null ? request.keywords() : "",
+                "keywords", store.getKeywords() != null ? store.getKeywords() : "",
                 "concept", request.concept() != null ? request.concept() : ""
         );
 
