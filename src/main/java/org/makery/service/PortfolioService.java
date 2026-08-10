@@ -148,7 +148,7 @@ public class PortfolioService {
                 .product(product)
                 .store(store)
                 .tags(tags)
-                .isInpaintingAllowed(true)
+                .isInpaintingAllowed(request.getIsInpaintingAllowed() != null ? request.getIsInpaintingAllowed() : true)
                 .build();
 
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
