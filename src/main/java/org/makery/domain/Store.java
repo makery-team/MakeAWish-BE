@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.makery.dto.StoreProfileUpdateRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,4 +67,19 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Portfolio> portfolios = new ArrayList<>();
+
+    @Column(length = 1000)
+    private String imageUrl;
+
+    // 이미지 업데이트를 위한 비즈니스 메서드
+    public void updateProfile(StoreProfileUpdateRequest request) {
+        this.name = request.getName();
+        this.description = request.getDescription();
+        this.address = request.getAddress();
+        this.phone = request.getPhone();
+        this.hours = request.getHours();
+        this.notice = request.getNotice();
+        this.cautionNotice = request.getCautionNotice();
+        this.imageUrl = request.getImageUrl(); // 이미지 추가
+    }
 }
