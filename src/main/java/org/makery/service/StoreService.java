@@ -116,6 +116,7 @@ public class StoreService {
         store.setHours(request.getHours());
         store.setNotice(request.getNotice());
         store.setCautionNotice(request.getCautionNotice());
+        store.setKeywords(request.getKeywords());
 
         if (request.getLatitude() != null && request.getLongitude() != null) {
             store.setLatitude(request.getLatitude());
@@ -183,7 +184,7 @@ public class StoreService {
 
         Map<String, String> requestData = Map.of(
                 "storeName", store.getName(),
-                "keywords", request.keywords() != null ? request.keywords() : "",
+                "keywords", store.getKeywords() != null ? store.getKeywords() : "",
                 "concept", request.concept() != null ? request.concept() : ""
         );
 
