@@ -21,4 +21,5 @@ public class StoreProfileUpdateRequest {
 
     private Double latitude;
     private Double longitude;
+    private String imageUrl;
 }
