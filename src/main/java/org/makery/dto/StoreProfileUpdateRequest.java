@@ -17,6 +17,7 @@ public class StoreProfileUpdateRequest {
     private String hours;
     private String notice;
     private String cautionNotice; // 알러지 및 주의사항 안내문
+    private String keywords; // 매장 핵심 키워드
 
     private Double latitude;
     private Double longitude;
