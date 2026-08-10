@@ -18,7 +18,7 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
             "WHERE (:query IS NULL OR s.name LIKE %:query% OR s.description LIKE %:query%)")
     List<Portfolio> searchByFilters(@Param("query") String query, Pageable pageable);
 
-    @Query("select p from Portfolio p join fetch p.store join fetch p.tags")
+    @Query("select p from Portfolio p join fetch p.store join fetch p.tags order by p.createdAt desc")
     Slice<Portfolio> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     @Query("select p from Portfolio p join fetch p.store join fetch p.tags order by p.likeCount desc")

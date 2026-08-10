@@ -111,19 +111,27 @@ public class UserService {
                 // B. 기본 매장(Store) 신규 생성
                 Store defaultStore = Store.builder()
                         .name(req.nickname())
+                        .description("")
                         .phone(req.phoneNumber())
-                        .description(null)
-                        .address(null)
-                        .hours(null)
-                        .notice(null)
-                        .cautionNotice(null)
-                        .latitude(null)
-                        .longitude(null)
+                        .address("")
+                        .hours("[]")
+                        .notice("")
                         .rating(0.0)
                         .reviewCount(0)
+                        // .user(user) <-- Store는 SellerProfile을 가지므로 이건 제거
                         .build();
 
-                // C. 연관관계 3종 매핑
+                // C. 기본 상품 카테고리(Product) 신규 생성 (포트폴리오 업로드 시 필수)
+                org.makery.domain.Product defaultProduct = org.makery.domain.Product.builder()
+                        .name("기본 카테고리")
+                        .description("기본으로 제공되는 카테고리입니다.")
+                        .price(0)
+                        .store(defaultStore)
+                        .build();
+                
+                defaultStore.getProducts().add(defaultProduct);
+
+                // C. 연관관계 3종 매핑 (storeRepository 없이 영속성 전이(Cascade)로 저장되도록 유도)
                 sellerProfile.addStore(defaultStore);
                 user.registerAsSeller(sellerProfile);
 

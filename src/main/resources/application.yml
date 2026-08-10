@@ -45,6 +45,11 @@ app:
   server:
     base-url: ${APP_SERVER_BASE_URL:http://localhost:8080}
 
+kakao:
+  rest:
+    api:
+      key: ${KAKAO_REST_API_KEY}
+
 jwt:
   issuer: ${JWT_ISSUER}
   secret-key: ${JWT_SECRET_KEY}
