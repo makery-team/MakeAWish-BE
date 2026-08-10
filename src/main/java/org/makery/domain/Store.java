@@ -74,7 +74,6 @@ public class Store extends BaseEntity {
     @Column(length = 1000)
     private String imageUrl;
 
-    // 이미지 업데이트를 위한 비즈니스 메서드
     public void updateProfile(StoreProfileUpdateRequest request) {
         this.name = request.getName();
         this.description = request.getDescription();
@@ -84,5 +83,6 @@ public class Store extends BaseEntity {
         this.notice = request.getNotice();
         this.cautionNotice = request.getCautionNotice();
         this.imageUrl = request.getImageUrl(); // 이미지 추가
+        this.keywords = request.getKeywords(); // 키워드 추가
     }
 }
