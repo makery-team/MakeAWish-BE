@@ -168,6 +168,12 @@ public class PortfolioService {
         if (request.getDescription() != null) portfolio.setDescription(request.getDescription());
         if (request.getImageUrl() != null) portfolio.setImageUrl(request.getImageUrl());
         if (request.getIsInpaintingAllowed() != null) portfolio.setInpaintingAllowed(request.getIsInpaintingAllowed());
+        
+        if (request.getProductId() != null) {
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 상품 카테고리 ID입니다. ID: " + request.getProductId()));
+            portfolio.setProduct(product);
+        }
 
         if (request.getTags() != null) {
             Set<Tag> updatedTags = request.getTags().stream()
