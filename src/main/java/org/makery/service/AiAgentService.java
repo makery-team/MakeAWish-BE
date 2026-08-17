@@ -1,6 +1,7 @@
 package org.makery.service;
 
 import lombok.RequiredArgsConstructor;
+import org.makery.client.AiClient;
 import org.makery.domain.AgentActionType;
 import org.makery.domain.AiAgentMessage;
 import org.makery.domain.SenderRole;
@@ -17,7 +18,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

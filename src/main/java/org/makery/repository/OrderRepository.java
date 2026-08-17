@@ -51,4 +51,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay
     );
+
+    /**
+     * 주문 번호(orderNumber) 기반 주문 조회
+     */
+    Optional<Order> findByOrderNumber(String orderNumber);
+
+    boolean existsByOrderNumber(String orderNumber);
 }

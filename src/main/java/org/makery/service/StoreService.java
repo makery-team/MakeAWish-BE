@@ -2,8 +2,8 @@ package org.makery.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.makery.client.AiClient;
 import org.makery.domain.Product; // 💡 Product 임포트 추가
-import org.makery.domain.SellerProfile;
 import org.makery.domain.Store;
 import org.makery.domain.User;
 import org.makery.dto.*;

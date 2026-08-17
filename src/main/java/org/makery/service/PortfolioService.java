@@ -2,6 +2,7 @@ package org.makery.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.makery.client.AiClient;
 import org.makery.domain.*;
 import org.makery.dto.*;
 import org.makery.repository.PortfolioRepository;
