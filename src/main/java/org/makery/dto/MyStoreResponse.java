@@ -26,6 +26,7 @@ public class MyStoreResponse {
     private Integer reviewCount;
     private Double latitude;
     private Double longitude;
+    private String imageUrl;
     private List<MyStoreProductResponse> categories;
 
     public static MyStoreResponse from(Store store) {
@@ -43,6 +44,7 @@ public class MyStoreResponse {
                 .reviewCount(store.getReviewCount())
                 .latitude(store.getLatitude())
                 .longitude(store.getLongitude())
+                .imageUrl(store.getImageUrl())
                 .categories(store.getProducts() != null ?
                         store.getProducts().stream()
                                 .map(MyStoreProductResponse::from)
