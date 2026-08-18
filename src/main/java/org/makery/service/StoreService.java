@@ -59,14 +59,17 @@ public class StoreService {
     }
 
     /**
-     * 💡 핵심 수정: 매장 ID가 아닌 '상품(카테고리) ID'로 양식을 조회합니다.
-     * 메서드명도 이해하기 쉽게 getProductSchema로 변경하는 것을 추천합니다.
+     * 💡 핵심 수정: 매장 ID로 기본 상품(카테고리)의 양식을 조회합니다.
      */
-    public OrderSchemaResponse getOrderSchema(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 상품(카테고리)을 찾을 수 없습니다. ID: " + productId));
-
-        // 💡 이제 OrderSchemaResponse.from()은 Product를 인자로 받습니다.
+    public OrderSchemaResponse getOrderSchemaByStoreId(Long storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 매장을 찾을 수 없습니다. ID: " + storeId));
+        
+        if (store.getProducts().isEmpty()) {
+            throw new IllegalStateException("매장에 등록된 상품이 없어 양식을 조회할 수 없습니다.");
+        }
+        
+        Product product = store.getProducts().get(0);
         return OrderSchemaResponse.from(product);
     }
 
