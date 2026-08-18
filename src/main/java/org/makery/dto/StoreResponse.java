@@ -23,6 +23,7 @@ public class StoreResponse {
     private Integer reviewCount;
     private Double latitude;
     private Double longitude;
+    private String imageUrl;
 
     // 💡 핵심 수정: 매장 직속 포트폴리오가 아니라, '카테고리(Product)' 리스트를 내려줍니다.
     private List<ProductResponse> categories;
@@ -41,6 +42,7 @@ public class StoreResponse {
                 .reviewCount(store.getReviewCount())
                 .latitude(store.getLatitude())
                 .longitude(store.getLongitude())
+                .imageUrl(store.getImageUrl())
                 // 💡 매장의 Product(카테고리)들을 DTO로 변환하여 담습니다.
                 .categories(store.getProducts().stream()
                         .map(ProductResponse::from)
