@@ -42,6 +42,18 @@ public class PaymentService {
             throw new IllegalStateException("결제 금액 불일치! DB: " + order.getTotalPrice() + ", 요청: " + request.amount());
         }
 
+        // 테스트 바이패스 키 처리 (개발/테스트 샌드박스 편의성)
+        if (request.paymentKey() != null && request.paymentKey().startsWith("test_bypass_")) {
+            log.info("🧪 [Payment] 테스트 바이패스 결제 승인: orderNumber={}", request.orderNumber());
+            Payment payment = paymentRepository.findByOrderId(order.getId())
+                    .orElseGet(() -> Payment.builder().order(order).amount(request.amount()).build());
+
+            payment.completePayment(request.paymentKey());
+            paymentRepository.save(payment);
+            order.updateStatus(OrderStatus.PAID);
+            return;
+        }
+
         // Basic Auth 인코딩 (SecretKey + ":")
         String authHeader = "Basic " + Base64.getEncoder().encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
         log.info("🔍 [Toss Payment] 생성된 Authorization Header: [{}]", authHeader);
