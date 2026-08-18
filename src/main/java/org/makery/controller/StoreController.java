@@ -95,7 +95,7 @@ public class StoreController {
      */
     @GetMapping("/{storeId}/order-schema")
     public ResponseEntity<OrderSchemaResponse> getOrderSchema(@PathVariable("storeId") Long storeId) {
-        OrderSchemaResponse response = storeService.getOrderSchema(storeId);
+        OrderSchemaResponse response = storeService.getOrderSchemaByStoreId(storeId);
         return ResponseEntity.ok(response);
     }
 
