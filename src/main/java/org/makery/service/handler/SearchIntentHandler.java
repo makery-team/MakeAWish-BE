@@ -31,7 +31,15 @@ public class SearchIntentHandler implements IntentHandler {
         // AI가 준 data 필드에서 tags 추출 (Map 형태 처리)
         if (aiResponse.data() != null && aiResponse.data().containsKey("tags")) {
             List<String> tags = (List<String>) aiResponse.data().get("tags");
-            results = portfolioRepository.findByTagNames(tags)
+            if (tags != null && !tags.isEmpty()) {
+                results = portfolioRepository.findByTagNamesRanked(tags)
+                        .stream().map(PortfolioDto::fromEntity).toList();
+            }
+        }
+
+        // 태그 매칭 결과가 없거나 태그가 없는 경우 전체 인기 포트폴리오 정렬 추천
+        if (results.isEmpty()) {
+            results = portfolioRepository.findAllRanked()
                     .stream().map(PortfolioDto::fromEntity).toList();
         }
 
