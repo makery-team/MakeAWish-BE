@@ -133,7 +133,7 @@ public class PortfolioService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 상품 카테고리 ID입니다. ID: " + request.getProductId()));
 
-        Set<Tag> tags = new HashSet<>();
+        Set<Tag> tags = new java.util.LinkedHashSet<>();
         if (request.getTags() != null) {
             for (String tagName : request.getTags()) {
                 Tag tag = tagRepository.findByName(tagName)
@@ -180,7 +180,7 @@ public class PortfolioService {
             Set<Tag> updatedTags = request.getTags().stream()
                     .map(tagName -> tagRepository.findByName(tagName)
                             .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build())))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
             portfolio.setTags(updatedTags);
         }
     }
