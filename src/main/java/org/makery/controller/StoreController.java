@@ -42,6 +42,18 @@ public class StoreController {
     }
 
     /**
+     * 내 매장 해지 및 판매자 권한 해제 API (소비자 계정은 유지)
+     * DELETE /api/stores/me
+     */
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> closeMyStore(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        storeService.closeMyStore(principalDetails.user().getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * 1. 매장 목록 조회 (통합 API)
      * GET /api/stores
      */
