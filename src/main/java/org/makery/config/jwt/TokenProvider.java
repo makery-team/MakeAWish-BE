@@ -90,9 +90,17 @@ public class TokenProvider {
                 new SimpleGrantedAuthority(role != null ? role : "ROLE_USER")
         );
 
+        org.makery.domain.UserRole userRole = org.makery.domain.UserRole.ROLE_USER;
+        if (role != null) {
+            try {
+                userRole = org.makery.domain.UserRole.valueOf(role);
+            } catch (Exception ignored) {}
+        }
+
         User user = User.builder()
                 .id(claims.get("id", Long.class))
                 .email(claims.getSubject())
+                .userRole(userRole)
                 .build();
 
         PrincipalDetails principalDetails = new PrincipalDetails(user);
