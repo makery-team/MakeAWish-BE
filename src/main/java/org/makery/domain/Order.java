@@ -58,6 +58,9 @@ public class Order extends BaseEntity {
     @OneToOne(mappedBy = "order")
     private Payment payment;
 
+    @OneToOne(mappedBy = "order")
+    private Review review;
+
     public void calculateTotalPrice() {
         int basePrice = items.stream()
                 .mapToInt(item -> item.getUnitPrice() * item.getQuantity())

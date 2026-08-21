@@ -12,7 +12,8 @@ public record OrderSummaryResponse(
         OrderStatus status,
         int totalPrice,
         LocalDateTime pickupDate,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean hasReview
 ) {
     public static OrderSummaryResponse from(Order order) {
         return new OrderSummaryResponse(
@@ -22,7 +23,8 @@ public record OrderSummaryResponse(
                 order.getStatus(),
                 order.getTotalPrice(),
                 order.getPickupDate(),
-                order.getCreatedAt()
+                order.getCreatedAt(),
+                order.getReview() != null
         );
     }
 }
