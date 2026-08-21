@@ -122,13 +122,19 @@ public class OrderService {
         Order order = orderRepository.findDetailById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문 내역을 찾을 수 없습니다."));
 
-        if (role == UserRole.ROLE_USER) {
-            if (!order.getUser().getId().equals(currentUserId)) {
-                throw new AccessDeniedException("본인의 주문만 조회할 수 있습니다.");
-            }
-        } else if (role == UserRole.ROLE_SELLER) {
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        UserRole effectiveRole = (user.getUserRole() != null) ? user.getUserRole() : role;
+        boolean isSeller = (effectiveRole == UserRole.ROLE_SELLER) || (user.getSellerProfile() != null);
+
+        if (isSeller) {
             if (!order.getStore().getSellerProfile().getUser().getId().equals(currentUserId)) {
                 throw new AccessDeniedException("본인 매장의 주문만 조회할 수 있습니다.");
+            }
+        } else {
+            if (!order.getUser().getId().equals(currentUserId)) {
+                throw new AccessDeniedException("본인의 주문만 조회할 수 있습니다.");
             }
         }
 
@@ -164,20 +170,36 @@ public class OrderService {
      * 주문 목록 조회 (date 파라미터 지원: "today"일 경우 오늘 주문 필터링)
      */
     public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role, String date) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        UserRole effectiveRole = (user.getUserRole() != null) ? user.getUserRole() : role;
+        boolean isSeller = (effectiveRole == UserRole.ROLE_SELLER) || (user.getSellerProfile() != null);
+
         List<Order> orders;
 
-        if ("today".equalsIgnoreCase(date)) {
-            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-            LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
-
-            if (role == UserRole.ROLE_SELLER) {
-                orders = orderRepository.findAllBySellerIdAndCreatedAtBetween(userId, startOfDay, endOfDay);
+        if (isSeller) {
+            if ("today".equalsIgnoreCase(date)) {
+                java.time.ZoneId kstZone = java.time.ZoneId.of("Asia/Seoul");
+                java.time.LocalDate today = java.time.LocalDate.now(kstZone);
+                orders = orderRepository.findAllBySellerId(userId).stream()
+                        .filter(o -> {
+                            boolean isPending = o.getStatus() == OrderStatus.PENDING_QUOTE;
+                            boolean isTodayCreated = o.getCreatedAt() != null &&
+                                    o.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).withZoneSameInstant(kstZone).toLocalDate().equals(today);
+                            boolean isTodayPickup = o.getPickupDate() != null &&
+                                    o.getPickupDate().atZone(java.time.ZoneId.systemDefault()).withZoneSameInstant(kstZone).toLocalDate().equals(today);
+                            return isPending || isTodayCreated || isTodayPickup;
+                        })
+                        .toList();
             } else {
-                orders = orderRepository.findAllByUserIdAndCreatedAtBetween(userId, startOfDay, endOfDay);
+                orders = orderRepository.findAllBySellerId(userId);
             }
         } else {
-            if (role == UserRole.ROLE_SELLER) {
-                orders = orderRepository.findAllBySellerId(userId);
+            if ("today".equalsIgnoreCase(date)) {
+                LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+                LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+                orders = orderRepository.findAllByUserIdAndCreatedAtBetween(userId, startOfDay, endOfDay);
             } else {
                 orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
             }
