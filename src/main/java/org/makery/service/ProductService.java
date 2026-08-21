@@ -31,10 +31,8 @@ public class ProductService {
             throw new AccessDeniedException("본인 매장의 상품만 생성할 수 있습니다.");
         }
 
-        // 기본 주문서 양식 (빈 형태)
-        Map<String, Object> defaultSchema = new HashMap<>();
-        defaultSchema.put("type", "object");
-        defaultSchema.put("properties", new HashMap<>());
+        // 기본 주문서 양식 (표준 5대 질문 자동 세팅)
+        Map<String, Object> defaultSchema = org.makery.util.OrderSchemaUtil.createDefaultOrderSchema();
 
         Product product = Product.builder()
                 .name(request.name())

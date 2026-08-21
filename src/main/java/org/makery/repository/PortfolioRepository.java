@@ -51,7 +51,26 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     List<String> findTrendingTagNames(Pageable pageable);
 
     /**
-     * AI 에이전트 추천용: 태그 리스트에 포함된 포트폴리오를 중복 없이 조회
+     * AI 에이전트 추천용: 태그 일치도(1순위) > 좋아요 수(2순위) > 최신순(3순위) 정렬 조회
+     */
+    @Query("SELECT p FROM Portfolio p " +
+            "JOIN FETCH p.store s " +
+            "JOIN p.tags t " +
+            "WHERE t.name IN :tagNames " +
+            "GROUP BY p.id " +
+            "ORDER BY COUNT(t.id) DESC, p.likeCount DESC, p.createdAt DESC")
+    List<Portfolio> findByTagNamesRanked(@Param("tagNames") List<String> tagNames);
+
+    /**
+     * 기본 추천용: 전체 포트폴리오 중 좋아요 수(1순위) > 최신순(2순위) 정렬 조회
+     */
+    @Query("SELECT DISTINCT p FROM Portfolio p " +
+            "JOIN FETCH p.store s " +
+            "ORDER BY p.likeCount DESC, p.createdAt DESC")
+    List<Portfolio> findAllRanked();
+
+    /**
+     * 레거시 호환용 태그 검색
      */
     @Query("SELECT DISTINCT p FROM Portfolio p " +
             "JOIN FETCH p.store s " +

@@ -121,12 +121,13 @@ public class UserService {
                         // .user(user) <-- Store는 SellerProfile을 가지므로 이건 제거
                         .build();
 
-                // C. 기본 상품 카테고리(Product) 신규 생성 (포트폴리오 업로드 시 필수)
+                // C. 기본 상품 카테고리(Product) 신규 생성 (표준 기본 주문서 양식 포함)
                 org.makery.domain.Product defaultProduct = org.makery.domain.Product.builder()
                         .name("기본 카테고리")
                         .description("기본으로 제공되는 카테고리입니다.")
                         .price(0)
                         .store(defaultStore)
+                        .orderSchema(org.makery.util.OrderSchemaUtil.createDefaultOrderSchema())
                         .build();
                 
                 defaultStore.getProducts().add(defaultProduct);
