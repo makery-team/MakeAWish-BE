@@ -36,6 +36,12 @@ public class ExtraFeeService {
             throw new IllegalArgumentException("본인 매장에 들어온 주문에 대해서만 추가금을 설정할 수 있습니다.");
         }
 
+        // 결제가 완료되었거나 진행 중인 주문은 추가금을 수정할 수 없음
+        if (order.getStatus() != org.makery.domain.OrderStatus.PENDING_QUOTE 
+                && order.getStatus() != org.makery.domain.OrderStatus.QUOTED) {
+            throw new IllegalStateException("결제가 완료되었거나 진행 중인 주문은 추가금을 수정할 수 없습니다.");
+        }
+
         // 추가금 업데이트 및 총액 재계산 (Dirty Checking 적용)
         order.updateExtraFee(request.getExtraFee(), request.getReason());
 
