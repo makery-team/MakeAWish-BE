@@ -15,9 +15,26 @@ public record OrderSummaryResponse(
         String extraFeeReason,
         LocalDateTime pickupDate,
         LocalDateTime createdAt,
-        boolean hasReview
+        boolean hasReview,
+        Long customerId,
+        String customerName,
+        String customerPhone
 ) {
     public static OrderSummaryResponse from(Order order) {
+        String name = "주문 고객";
+        String phone = null;
+        Long userId = null;
+
+        if (order.getUser() != null) {
+            userId = order.getUser().getId();
+            if (order.getUser().getName() != null && !order.getUser().getName().isBlank()) {
+                name = order.getUser().getName();
+            } else if (order.getUser().getNickname() != null && !order.getUser().getNickname().isBlank()) {
+                name = order.getUser().getNickname();
+            }
+            phone = order.getUser().getPhoneNumber();
+        }
+
         return new OrderSummaryResponse(
                 order.getId(),
                 order.getOrderNumber(),
@@ -28,7 +45,10 @@ public record OrderSummaryResponse(
                 order.getExtraFeeReason(),
                 order.getPickupDate(),
                 order.getCreatedAt(),
-                order.getReview() != null
+                order.getReview() != null,
+                userId,
+                name,
+                phone
         );
     }
 }
