@@ -9,8 +9,12 @@ import org.makery.dto.PortfolioDto;
 import org.makery.repository.PortfolioRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -30,9 +34,24 @@ public class SearchIntentHandler implements IntentHandler {
 
         // AI가 준 data 필드에서 tags 추출 (Map 형태 처리)
         if (aiResponse.data() != null && aiResponse.data().containsKey("tags")) {
-            List<String> tags = (List<String>) aiResponse.data().get("tags");
-            if (tags != null && !tags.isEmpty()) {
-                results = portfolioRepository.findByTagNamesRanked(tags)
+            List<String> rawTags = (List<String>) aiResponse.data().get("tags");
+            if (rawTags != null && !rawTags.isEmpty()) {
+                // 단어별 하드코딩 없이, 모든 키워드에 대해 동적으로 '케이크' 접미사 유무 상호 변환 지원 (예: '생일' <-> '생일케이크', '루피' <-> '루피케이크')
+                Set<String> searchKeywords = new LinkedHashSet<>();
+                for (String raw : rawTags) {
+                    if (raw == null || raw.isBlank()) continue;
+                    String clean = raw.replace("#", "").trim();
+                    searchKeywords.add(clean);
+
+                    String root = clean.replaceAll("케이크|cake", "").trim();
+                    if (!root.isEmpty()) {
+                        searchKeywords.add(root);
+                        searchKeywords.add(root + "케이크");
+                        searchKeywords.add(root + " 케이크");
+                    }
+                }
+
+                results = portfolioRepository.findByTagNamesRanked(new ArrayList<>(searchKeywords))
                         .stream().map(PortfolioDto::fromEntity).toList();
             }
         }

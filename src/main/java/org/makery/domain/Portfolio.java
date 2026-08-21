@@ -45,7 +45,7 @@ public class Portfolio extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     @Builder.Default
-    private Set<Tag> tags = new HashSet<>();
+    private Set<Tag> tags = new java.util.LinkedHashSet<>();
 
     @Builder.Default
     private boolean isInpaintingAllowed = true;
