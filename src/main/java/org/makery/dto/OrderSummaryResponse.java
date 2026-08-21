@@ -11,6 +11,8 @@ public record OrderSummaryResponse(
         String storeName,
         OrderStatus status,
         int totalPrice,
+        Integer extraFee,
+        String extraFeeReason,
         LocalDateTime pickupDate,
         LocalDateTime createdAt,
         boolean hasReview
@@ -22,6 +24,8 @@ public record OrderSummaryResponse(
                 order.getStore().getName(),
                 order.getStatus(),
                 order.getTotalPrice(),
+                order.getExtraFee() != null ? order.getExtraFee() : 0,
+                order.getExtraFeeReason(),
                 order.getPickupDate(),
                 order.getCreatedAt(),
                 order.getReview() != null

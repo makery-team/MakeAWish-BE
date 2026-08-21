@@ -14,9 +14,12 @@ public record OrderDetailResponse(
         OrderStatus status,
         LocalDateTime pickupDate,
         int totalPrice,
+        Integer extraFee,
+        String extraFeeReason,
         Map<String, Object> orderData,
         List<OrderItemResponse> items,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        boolean hasReview
 ) {
     public static OrderDetailResponse from(Order order) {
         return new OrderDetailResponse(
@@ -26,11 +29,14 @@ public record OrderDetailResponse(
                 order.getStatus(),
                 order.getPickupDate(),
                 order.getTotalPrice(),
+                order.getExtraFee() != null ? order.getExtraFee() : 0,
+                order.getExtraFeeReason(),
                 order.getOrderData(),
                 order.getItems().stream()
                         .map(OrderItemResponse::from)
                         .toList(),
-                order.getCreatedAt()
+                order.getCreatedAt(),
+                order.getReview() != null
         );
     }
 }
