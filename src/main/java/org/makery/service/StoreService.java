@@ -3,12 +3,15 @@ package org.makery.service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.makery.client.AiClient;
-import org.makery.domain.Product; // 💡 Product 임포트 추가
+import org.makery.domain.Product;
+import org.makery.domain.SellerProfile;
 import org.makery.domain.Store;
 import org.makery.domain.User;
 import org.makery.dto.*;
 import org.makery.repository.ProductRepository; // 💡 ProductRepository 주입 필요
+import org.makery.repository.SellerProfileRepository;
 import org.makery.repository.StoreRepository;
+import org.makery.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,8 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final SellerProfileRepository sellerProfileRepository;
     private final AiClient aiClient;
     private final KakaoLocalClient kakaoLocalClient;
 
@@ -201,5 +206,21 @@ public class StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("등록된 매장 정보를 찾을 수 없습니다. userId: " + userId));
 
         return MyStoreResponse.from(store);
+    }
+
+    /**
+     * 사장님 매장 해지 및 판매자 권한 해제 (일반 구매자 계정은 유지)
+     */
+    @Transactional
+    public void closeMyStore(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + userId));
+
+        SellerProfile sellerProfile = user.getSellerProfile();
+        if (sellerProfile != null) {
+            user.unregisterSeller();
+            sellerProfileRepository.delete(sellerProfile);
+            log.info("Successfully closed store and unregistered seller for user ID: {}", userId);
+        }
     }
 }
