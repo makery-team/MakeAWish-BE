@@ -113,4 +113,62 @@ public class NotificationController {
         notificationService.markAllAsRead(principalDetails.user().getId());
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * 6. [디바이스 푸시 토큰 등록]
+     * POST /api/notifications/device-token
+     */
+    @org.springframework.web.bind.annotation.PostMapping("/device-token")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> registerDeviceToken(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @org.springframework.web.bind.annotation.RequestBody org.makery.dto.DeviceTokenRequest request) {
+
+        notificationService.registerDeviceToken(principalDetails.user(), request.token(), request.platform());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 7. [디바이스 푸시 토큰 삭제 (로그아웃 시)]
+     * DELETE /api/notifications/device-token
+     */
+    @org.springframework.web.bind.annotation.DeleteMapping("/device-token")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> removeDeviceToken(
+            @org.springframework.web.bind.annotation.RequestBody org.makery.dto.DeviceTokenRequest request) {
+
+        notificationService.removeDeviceToken(request.token());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 8. [알림 수신 설정 조회]
+     * GET /api/notifications/settings
+     */
+    @GetMapping("/settings")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<org.makery.dto.NotificationSettingsResponse> getSettings(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        return ResponseEntity.ok(notificationService.getNotificationSettings(principalDetails.user().getId()));
+    }
+
+    /**
+     * 9. [알림 수신 설정 변경]
+     * PATCH /api/notifications/settings
+     */
+    @org.springframework.web.bind.annotation.PatchMapping("/settings")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<org.makery.dto.NotificationSettingsResponse> updateSettings(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @org.springframework.web.bind.annotation.RequestBody org.makery.dto.NotificationSettingsUpdateRequest request) {
+
+        org.makery.dto.NotificationSettingsResponse updated = notificationService.updateNotificationSettings(
+                principalDetails.user().getId(),
+                request.orderPushEnabled(),
+                request.chatPushEnabled(),
+                request.marketingPushEnabled()
+        );
+        return ResponseEntity.ok(updated);
+    }
 }
