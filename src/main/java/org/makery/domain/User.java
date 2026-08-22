@@ -40,8 +40,29 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OAuthProvider oAuthProvider;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean orderPushEnabled = true; // 주문/결제 알림 수신 동의
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean chatPushEnabled = true; // 채팅 알림 수신 동의
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean marketingPushEnabled = false; // 마케팅 및 혜택 알림 수신 동의
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private SellerProfile sellerProfile; // 판매자 프로필
+
+    /**
+     * 알림 수신 설정 업데이트
+     */
+    public void updateNotificationSettings(Boolean orderPush, Boolean chatPush, Boolean marketingPush) {
+        if (orderPush != null) this.orderPushEnabled = orderPush;
+        if (chatPush != null) this.chatPushEnabled = chatPush;
+        if (marketingPush != null) this.marketingPushEnabled = marketingPush;
+    }
 
     /**
      * 소셜 계정의 최신 이름 정보를 동기화
