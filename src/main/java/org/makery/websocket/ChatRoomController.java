@@ -29,10 +29,17 @@ public class ChatRoomController {
         // 1. 현재 로그인 유저를 DB에서 다시 조회 (영속 상태 보장)
         User user = userService.findById(principalUser.user().getId());
 
-        // 2. 상대 유저도 조회 (매장 ID를 통해 사장님 유저 찾기)
-        org.makery.domain.Store store = storeRepository.findById(chatRoomRequestDto.getStoreId())
-                .orElseThrow(() -> new IllegalArgumentException("Store not found"));
-        User other = store.getSellerProfile().getUser();
+        // 2. 상대 유저도 조회 (고객 userId 또는 매장 storeId 지원)
+        User other;
+        if (chatRoomRequestDto.getUserId() != null) {
+            other = userService.findById(chatRoomRequestDto.getUserId());
+        } else if (chatRoomRequestDto.getStoreId() != null) {
+            org.makery.domain.Store store = storeRepository.findById(chatRoomRequestDto.getStoreId())
+                    .orElseThrow(() -> new IllegalArgumentException("Store not found"));
+            other = store.getSellerProfile().getUser();
+        } else {
+            throw new IllegalArgumentException("userId or storeId must be provided");
+        }
 
         Optional<ChatRoom> optionalChatRoom = chatRoomService.findByUserAndOther(user, other);
 
