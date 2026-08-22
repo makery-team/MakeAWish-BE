@@ -50,12 +50,14 @@ public class OrderController {
     @PatchMapping("/{orderId}/status")
     public ResponseEntity<Void> updateStatus(@AuthenticationPrincipal PrincipalDetails principalDetails,
                                              @PathVariable Long orderId,
-                                             @RequestParam OrderStatus status) {
+                                             @RequestParam OrderStatus status,
+                                             @RequestParam(required = false) String reason) {
 
         orderService.updateOrderStatus(
                 orderId,
                 principalDetails.user().getId(),
-                status
+                status,
+                reason
         );
 
         return ResponseEntity.ok().build();
@@ -88,10 +90,12 @@ public class OrderController {
             @PathVariable Long orderId,
             @RequestBody org.makery.dto.OrderStatusUpdateRequest request) {
 
+        String reason = request.reason() != null ? request.reason() : request.rejectReason();
         orderService.updateOrderStatusByBody(
                 orderId,
                 principalDetails.user().getId(),
-                request.status()
+                request.status(),
+                reason
         );
 
         return ResponseEntity.ok().build();

@@ -18,7 +18,8 @@ public record OrderSummaryResponse(
         boolean hasReview,
         Long customerId,
         String customerName,
-        String customerPhone
+        String customerPhone,
+        String rejectReason
 ) {
     public static OrderSummaryResponse from(Order order) {
         String name = "주문 고객";
@@ -48,7 +49,8 @@ public record OrderSummaryResponse(
                 order.getReview() != null,
                 userId,
                 name,
-                phone
+                phone,
+                order.getRejectReason()
         );
     }
 }

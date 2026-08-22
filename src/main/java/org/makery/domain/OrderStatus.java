@@ -8,5 +8,6 @@ public enum OrderStatus {
     IN_PROGRESS,    // 작업 진행 중
     PICKUP_READY,   // 픽업 준비 완료
     COMPLETED,      // 작업 및 주문 최종 완료
-    CANCELED        // 주문 취소 상태
+    CANCELED,       // 주문 취소 상태 (소비자 취소)
+    REJECTED        // 주문 거절 상태 (사장님 거절)
 }
