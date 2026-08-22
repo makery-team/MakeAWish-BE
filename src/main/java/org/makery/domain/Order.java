@@ -39,6 +39,9 @@ public class Order extends BaseEntity {
     @Column(name = "extra_fee_reason", columnDefinition = "TEXT")
     private String extraFeeReason;
 
+    @Column(name = "reject_reason", columnDefinition = "TEXT")
+    private String rejectReason;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private Map<String, Object> orderData;
@@ -71,10 +74,17 @@ public class Order extends BaseEntity {
     }
 
     public void updateStatus(OrderStatus newStatus) {
-        if (this.status == OrderStatus.COMPLETED || this.status == OrderStatus.CANCELED) {
+        updateStatus(newStatus, null);
+    }
+
+    public void updateStatus(OrderStatus newStatus, String reason) {
+        if (this.status == OrderStatus.COMPLETED || this.status == OrderStatus.CANCELED || this.status == OrderStatus.REJECTED) {
             throw new IllegalStateException("이미 종료된 주문은 상태를 변경할 수 없습니다.");
         }
         this.status = newStatus;
+        if (reason != null && !reason.isBlank()) {
+            this.rejectReason = reason;
+        }
     }
 
     /**

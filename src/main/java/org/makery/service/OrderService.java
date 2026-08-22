@@ -153,7 +153,7 @@ public class OrderService {
      * 주문 상태 변경
      */
     @Transactional
-    public void updateOrderStatus(Long orderId, Long userId, OrderStatus newStatus) {
+    public void updateOrderStatus(Long orderId, Long userId, OrderStatus newStatus, String reason) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
 
@@ -163,7 +163,12 @@ public class OrderService {
             throw new RuntimeException("본인 매장의 주문 상태만 변경할 수 있습니다.");
         }
 
-        order.updateStatus(newStatus);
+        order.updateStatus(newStatus, reason);
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, Long userId, OrderStatus newStatus) {
+        updateOrderStatus(orderId, userId, newStatus, null);
     }
 
     /**
@@ -214,7 +219,7 @@ public class OrderService {
      * 주문 상태 변경 (JSON 바디 수신 형태 - ACCEPTED/REJECTED 매핑)
      */
     @Transactional
-    public void updateOrderStatusByBody(Long orderId, Long userId, String statusStr) {
+    public void updateOrderStatusByBody(Long orderId, Long userId, String statusStr, String reason) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
 
@@ -224,7 +229,12 @@ public class OrderService {
         }
 
         OrderStatus newStatus = mapStatus(statusStr);
-        order.updateStatus(newStatus);
+        order.updateStatus(newStatus, reason);
+    }
+
+    @Transactional
+    public void updateOrderStatusByBody(Long orderId, Long userId, String statusStr) {
+        updateOrderStatusByBody(orderId, userId, statusStr, null);
     }
 
     private OrderStatus mapStatus(String input) {
@@ -232,8 +242,10 @@ public class OrderService {
         String upper = input.toUpperCase().trim();
         switch (upper) {
             case "ACCEPTED":
-                return OrderStatus.IN_PROGRESS;
+                return OrderStatus.QUOTED;
             case "REJECTED":
+                return OrderStatus.REJECTED;
+            case "CANCELED":
                 return OrderStatus.CANCELED;
             default:
                 try {
