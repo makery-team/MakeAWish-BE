@@ -19,6 +19,7 @@ public class ExtraFeeService {
 
     private final OrderRepository orderRepository;
     private final StoreRepository storeRepository;
+    private final NotificationService notificationService;
 
     /**
      * 1. [사장님] 주문에 대한 추가금 및 사유 등록/수정
@@ -44,6 +45,26 @@ public class ExtraFeeService {
 
         // 추가금 업데이트 및 총액 재계산 (Dirty Checking 적용)
         order.updateExtraFee(request.getExtraFee(), request.getReason());
+
+        // 🌟 고객에게 추가금 등록/수정 실시간 알림 발송
+        try {
+            if (order.getUser() != null) {
+                String storeName = order.getStore() != null ? order.getStore().getName() : "매장";
+                String msg = (request.getExtraFee() != null && request.getExtraFee() > 0)
+                        ? String.format("'%s'에서 추가금 %,d원이 등록되었습니다. (사유: %s)", storeName, request.getExtraFee(), request.getReason())
+                        : String.format("'%s'에서 주문 금액이 업데이트되었습니다.", storeName);
+
+                notificationService.createNotification(
+                        order.getUser(),
+                        "견적/추가금 안내",
+                        msg,
+                        org.makery.domain.NotificationType.ORDER,
+                        order.getId()
+                );
+            }
+        } catch (Exception e) {
+            // log
+        }
 
         return ExtraFeeResponse.from(order);
     }
