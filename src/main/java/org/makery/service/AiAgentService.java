@@ -13,6 +13,7 @@ import org.makery.dto.AiIntentResponse;
 import org.makery.dto.AiMessageDto;
 import org.makery.repository.AiAgentMessageRepository;
 import org.makery.repository.ProductRepository;
+import org.makery.repository.UserRepository;
 import org.makery.service.handler.IntentHandler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,16 @@ public class AiAgentService {
     private final AiClient aiClient;
     private final AiAgentMessageRepository messageRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
     private final List<IntentHandler> intentHandlers; // 스프링이 핸들러 구현체들을 자동 주입
 
     @Transactional
     public AiAgentResponse handleUserChat(User user, String userMessage, Long productId) {
+        // 영속성 컨텍스트 관리를 위해 DB에서 관리되는 엔티티 조회 (Detached 방어)
+        User managedUser = userRepository.findById(user.getId()).orElse(user);
 
         // 1. 이전 대화 내역 조회
-        List<AiAgentMessage> pastMessages = messageRepository.findByUserIdOrderByCreatedAtAsc(user.getId());
+        List<AiAgentMessage> pastMessages = messageRepository.findByUserIdOrderByCreatedAtAsc(managedUser.getId());
         List<AiMessageDto> chatHistory = pastMessages.stream()
                 .map(msg -> new AiMessageDto(
                         msg.getSenderRole().name().toLowerCase(),
@@ -43,7 +47,7 @@ public class AiAgentService {
                 .toList();
 
         // 2. 현재 사용자 질문 저장
-        saveMessage(user, userMessage, SenderRole.USER, null, null);
+        saveMessage(managedUser, userMessage, SenderRole.USER, null, null);
 
         // 3. 상품 스키마 조회
         Map<String, Object> schemaJson = null;
@@ -65,11 +69,11 @@ public class AiAgentService {
         AiAgentResponse finalResponse = intentHandlers.stream()
                 .filter(handler -> handler.supports(aiResponse.actionType())) // 수정됨
                 .findFirst()
-                .map(handler -> handler.handle(user, aiResponse))
+                .map(handler -> handler.handle(managedUser, aiResponse))
                 .orElseThrow(() -> new IllegalStateException("확실하지 않음: 정의되지 않은 AI 액션입니다. 수신된 액션 = " + aiResponse.actionType())); // 수정됨
 
         // 4. AI 답변 기록 (비동기)
-        saveAiResponseAsync(user, finalResponse);
+        saveAiResponseAsync(managedUser, finalResponse);
 
         return finalResponse;
     }

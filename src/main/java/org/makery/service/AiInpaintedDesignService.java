@@ -13,6 +13,7 @@ import org.makery.dto.InpaintingRequest;
 import org.makery.dto.InpaintingResponse;
 import org.makery.repository.AiInpaintedDesignRepository;
 import org.makery.repository.PortfolioRepository;
+import org.makery.repository.UserRepository;
 import org.makery.websocket.AwsS3Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class AiInpaintedDesignService {
     private final AwsS3Service awsS3Service;
     private final PortfolioRepository portfolioRepository;
     private final AiInpaintedDesignRepository aiInpaintedDesignRepository;
+    private final UserRepository userRepository;
 
     @Value("${app.server.base-url}")
     private String backendBaseUrl;
@@ -36,6 +38,7 @@ public class AiInpaintedDesignService {
      */
     @Transactional
     public InpaintingResponse requestInpainting(Long portfolioId, InpaintingRequest request, User user) {
+        User managedUser = userRepository.findById(user.getId()).orElse(user);
         Portfolio origin = portfolioRepository.findById(portfolioId).orElse(null);
 
         String cleanMaskB64 = extractPureBase64(request.maskImage());
@@ -59,7 +62,7 @@ public class AiInpaintedDesignService {
 
         // 1. PENDING 상태로 DB에 우선 저장 (비동기 콜백 추적용 ID 발급)
         AiInpaintedDesign pendingDesign = aiInpaintedDesignRepository.save(AiInpaintedDesign.builder()
-                .user(user)
+                .user(managedUser)
                 .originPortfolio(origin)
                 .inpaintingPrompt(request.prompt())
                 .beforeImageUrl(beforeImageForDb)
