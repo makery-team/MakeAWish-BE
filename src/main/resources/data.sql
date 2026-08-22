@@ -3,6 +3,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DELETE FROM ai_agent_messages;
 DELETE FROM ai_inpainted_designs;
 DELETE FROM notifications;
+DELETE FROM device_tokens;
 DELETE FROM likes;
 DELETE FROM portfolio_tags;
 DELETE FROM reviews;
@@ -22,12 +23,12 @@ DELETE FROM chat_message;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1. 유저 (Users) - 5명, 전원 구글 로그인, 1번 관리자
-INSERT INTO users (id, email, password, name, nickname, phone_number, language, user_role, o_auth_provider, created_at, modified_at) VALUES
-(1, 'admin@gmail.com', 'google_oauth_dummy', '김관리', '어드민케이커', '010-1111-1111', 'KO', 'ROLE_ADMIN', 'GOOGLE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(2, 'user2@gmail.com', 'google_oauth_dummy', '이주문', '빵순이', '010-2222-2222', 'KO', 'ROLE_USER', 'GOOGLE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(3, 'user3@gmail.com', 'google_oauth_dummy', '박달콤', '디저트러버', '010-3333-3333', 'KO', 'ROLE_USER', 'GOOGLE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(4, 'user4@gmail.com', 'google_oauth_dummy', '최제빵', '케이크매니아', '010-4444-4444', 'KO', 'ROLE_USER', 'GOOGLE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(5, 'user5@gmail.com', 'google_oauth_dummy', '정선물', '기념일요정', '010-5555-5555', 'KO', 'ROLE_USER', 'GOOGLE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (id, email, password, name, nickname, phone_number, language, user_role, o_auth_provider, order_push_enabled, chat_push_enabled, marketing_push_enabled, created_at, modified_at) VALUES
+(1, 'admin@gmail.com', 'google_oauth_dummy', '김관리', '어드민케이커', '010-1111-1111', 'KO', 'ROLE_ADMIN', 'GOOGLE', true, true, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'user2@gmail.com', 'google_oauth_dummy', '이주문', '빵순이', '010-2222-2222', 'KO', 'ROLE_USER', 'GOOGLE', true, true, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'user3@gmail.com', 'google_oauth_dummy', '박달콤', '디저트러버', '010-3333-3333', 'KO', 'ROLE_USER', 'GOOGLE', true, true, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 'user4@gmail.com', 'google_oauth_dummy', '최제빵', '케이크매니아', '010-4444-4444', 'KO', 'ROLE_USER', 'GOOGLE', true, true, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 'user5@gmail.com', 'google_oauth_dummy', '정선물', '기념일요정', '010-5555-5555', 'KO', 'ROLE_USER', 'GOOGLE', true, true, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 2. 판매자 프로필 (Seller Profiles) - 5개
 INSERT INTO seller_profiles (id, business_no, bank_account, status, user_id, created_at, modified_at) VALUES
