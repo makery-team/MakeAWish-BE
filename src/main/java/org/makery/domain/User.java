@@ -41,15 +41,15 @@ public class User extends BaseEntity {
     private OAuthProvider oAuthProvider;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean orderPushEnabled = true; // 주문/결제 알림 수신 동의
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean chatPushEnabled = true; // 채팅 알림 수신 동의
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean marketingPushEnabled = false; // 마케팅 및 혜택 알림 수신 동의
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
