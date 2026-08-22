@@ -21,6 +21,12 @@ public class SocketHandler implements WebSocketHandler {
     @Autowired
     private ChatRoomRepository chatRoomRepository;
 
+    @Autowired
+    private org.makery.repository.UserRepository userRepository;
+
+    @Autowired
+    private org.makery.service.NotificationService notificationService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -103,6 +109,37 @@ public class SocketHandler implements WebSocketHandler {
                         log.error("메시지 전송 실패 - userId: {}", entry.getKey(), e);
                     }
                 }
+            }
+
+            // 🌟 상대방이 같은 웹소켓 방에 들어와있지 않은 경우 SSE 알림 발송
+            try {
+                ChatRoom chatRoom = chatRoomRepository.findById(roomNumber).orElse(null);
+                if (chatRoom != null && chatRoom.getUser() != null && chatRoom.getOther() != null) {
+                    Long otherUserId = chatRoom.getUser().getId().equals(userId)
+                            ? chatRoom.getOther().getId()
+                            : chatRoom.getUser().getId();
+
+                    boolean isOtherInRoom = room != null && room.containsKey(otherUserId);
+                    if (!isOtherInRoom) {
+                        userRepository.findById(otherUserId).ifPresent(targetUser -> {
+                            userRepository.findById(userId).ifPresent(senderUser -> {
+                                String senderName = senderUser.getName() != null && !senderUser.getName().isBlank()
+                                        ? senderUser.getName()
+                                        : (senderUser.getNickname() != null ? senderUser.getNickname() : "대화 상대");
+
+                                notificationService.createNotification(
+                                        targetUser,
+                                        "새 메시지 도착",
+                                        String.format("[%s] %s", senderName, requestDto.getMessage()),
+                                        org.makery.domain.NotificationType.CHAT,
+                                        roomNumber
+                                );
+                            });
+                        });
+                    }
+                }
+            } catch (Exception notifEx) {
+                log.warn("채팅 알림 발송 실패: {}", notifEx.getMessage());
             }
 
         } catch (Exception e) {

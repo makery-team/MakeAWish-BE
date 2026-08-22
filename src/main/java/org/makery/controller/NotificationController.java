@@ -73,4 +73,44 @@ public class NotificationController {
         Slice<NotificationResponse> responses = notificationService.getMyNotifications(principalDetails.user(), pageable);
         return ResponseEntity.ok(responses);
     }
+
+    /**
+     * 3. [미확인 알림 수 조회]
+     * GET /api/notifications/unread-count
+     */
+    @GetMapping("/unread-count")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<java.util.Map<String, Object>> getUnreadCount(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        long count = notificationService.getUnreadCount(principalDetails.user().getId());
+        return ResponseEntity.ok(java.util.Map.of("unreadCount", count));
+    }
+
+    /**
+     * 4. [단건 알림 읽음 처리]
+     * PATCH /api/notifications/{id}/read
+     */
+    @org.springframework.web.bind.annotation.PatchMapping("/{id}/read")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> markAsRead(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @org.springframework.web.bind.annotation.PathVariable Long id) {
+
+        notificationService.markAsRead(id, principalDetails.user().getId());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 5. [전체 알림 일괄 읽음 처리]
+     * PATCH /api/notifications/read-all
+     */
+    @org.springframework.web.bind.annotation.PatchMapping("/read-all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> markAllAsRead(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+        notificationService.markAllAsRead(principalDetails.user().getId());
+        return ResponseEntity.ok().build();
+    }
 }

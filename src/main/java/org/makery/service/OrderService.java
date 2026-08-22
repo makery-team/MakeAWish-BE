@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.makery.dto.MessageDraftResponse;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final PortfolioRepository portfolioRepository;
+    private final NotificationService notificationService;
 
     /**
      * 주문 생성
@@ -82,7 +86,29 @@ public class OrderService {
 
         order.setTotalPrice(calculatedTotalPrice);
 
-        return orderRepository.save(order).getId();
+        Order savedOrder = orderRepository.save(order);
+
+        // 🌟 사장님에게 실시간 새 주문 접수 알림 발송
+        try {
+            if (store.getSellerProfile() != null && store.getSellerProfile().getUser() != null) {
+                User storeOwner = store.getSellerProfile().getUser();
+                String customerName = (user.getName() != null && !user.getName().isBlank())
+                        ? user.getName()
+                        : ((user.getNickname() != null && !user.getNickname().isBlank()) ? user.getNickname() : "고객");
+
+                notificationService.createNotification(
+                        storeOwner,
+                        "새 주문 접수",
+                        String.format("새로운 주문이 접수되었습니다! (주문번호: %s, 고객: %s)", savedOrder.getOrderNumber(), customerName),
+                        org.makery.domain.NotificationType.ORDER,
+                        savedOrder.getId()
+                );
+            }
+        } catch (Exception e) {
+            log.warn("사장님 새 주문 알림 발송 실패 (Order ID: {}): {}", savedOrder.getId(), e.getMessage());
+        }
+
+        return savedOrder.getId();
     }
 
     /**
@@ -164,6 +190,7 @@ public class OrderService {
         }
 
         order.updateStatus(newStatus, reason);
+        sendStatusNotification(order, newStatus, reason);
     }
 
     @Transactional
@@ -230,11 +257,41 @@ public class OrderService {
 
         OrderStatus newStatus = mapStatus(statusStr);
         order.updateStatus(newStatus, reason);
+        sendStatusNotification(order, newStatus, reason);
     }
 
     @Transactional
     public void updateOrderStatusByBody(Long orderId, Long userId, String statusStr) {
         updateOrderStatusByBody(orderId, userId, statusStr, null);
+    }
+
+    private void sendStatusNotification(Order order, OrderStatus newStatus, String reason) {
+        try {
+            User customer = order.getUser();
+            if (customer == null) return;
+            String storeName = (order.getStore() != null && order.getStore().getName() != null)
+                    ? order.getStore().getName() : "매장";
+            String title = "주문 상태 안내";
+            String msg = switch (newStatus) {
+                case QUOTED -> String.format("'%s'에서 주문 견적이 도착했습니다. 확인 후 결제를 진행해주세요.", storeName);
+                case REJECTED -> String.format("'%s'에서 주문이 거절되었습니다.%s", storeName, (reason != null && !reason.isBlank()) ? " (사유: " + reason + ")" : "");
+                case CANCELED -> String.format("'%s' 주문이 취소되었습니다.", storeName);
+                case IN_PROGRESS -> String.format("'%s'에서 케이크 제작을 시작했습니다.", storeName);
+                case PICKUP_READY -> String.format("'%s'에서 케이크 준비가 완료되었습니다! 매장에서 픽업해주세요.", storeName);
+                case COMPLETED -> String.format("'%s' 케이크 픽업이 완료되었습니다. 소중한 리뷰를 남겨보세요! 🎂", storeName);
+                default -> String.format("주문번호 [%s]의 상태가 '%s'로 변경되었습니다.", order.getOrderNumber(), newStatus);
+            };
+
+            notificationService.createNotification(
+                    customer,
+                    title,
+                    msg,
+                    org.makery.domain.NotificationType.ORDER,
+                    order.getId()
+            );
+        } catch (Exception e) {
+            log.warn("고객 주문상태 알림 발송 실패 (Order ID: {}): {}", order.getId(), e.getMessage());
+        }
     }
 
     private OrderStatus mapStatus(String input) {

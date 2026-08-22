@@ -28,6 +28,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final TossPaymentsClient tossPaymentsClient;
+    private final NotificationService notificationService;
 
     @Value("${toss.payments.secret-key}")
     private String secretKey;
@@ -51,6 +52,7 @@ public class PaymentService {
             payment.completePayment(request.paymentKey());
             paymentRepository.save(payment);
             order.updateStatus(OrderStatus.PAID);
+            sendPaymentSuccessNotification(order);
             return;
         }
 
@@ -73,10 +75,32 @@ public class PaymentService {
             payment.completePayment(request.paymentKey());
             paymentRepository.save(payment);
             order.updateStatus(OrderStatus.PAID);
+            sendPaymentSuccessNotification(order);
 
         } catch (Exception e) {
             log.error("❌ 토스 결제 승인 실패: {}", e.getMessage());
             throw new IllegalStateException("결제 승인 중 에러 발생: " + e.getMessage());
+        }
+    }
+
+    private void sendPaymentSuccessNotification(Order order) {
+        try {
+            if (order.getStore() != null && order.getStore().getSellerProfile() != null && order.getStore().getSellerProfile().getUser() != null) {
+                org.makery.domain.User storeOwner = order.getStore().getSellerProfile().getUser();
+                String customerName = order.getUser() != null
+                        ? (order.getUser().getName() != null ? order.getUser().getName() : order.getUser().getNickname())
+                        : "고객";
+
+                notificationService.createNotification(
+                        storeOwner,
+                        "결제 완료 안내",
+                        String.format("'%s'님의 주문 (%,d원) 결제가 완료되었습니다. 케이크 제작을 준비해주세요!", customerName, order.getTotalPrice()),
+                        org.makery.domain.NotificationType.PAYMENT,
+                        order.getId()
+                );
+            }
+        } catch (Exception e) {
+            log.warn("결제 완료 알림 발송 실패 (Order ID: {}): {}", order.getId(), e.getMessage());
         }
     }
 
