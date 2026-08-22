@@ -7,17 +7,28 @@ import com.google.api.client.json.gson.GsonFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
+import java.util.*;
 
 @Component
 public class GoogleTokenVerifier {
 
     private final GoogleIdTokenVerifier verifier;
 
-    public GoogleTokenVerifier(@Value("${app.auth.google.web-client-id}") String webClientId) {
+    // Web, Android, iOS 모든 클라이언트 ID를 기본 허용 목록으로 등록
+    private static final List<String> KNOWN_CLIENT_IDS = List.of(
+            "106131390766-mnqk6vkbs4n33s2tt63om1860e6cgaau.apps.googleusercontent.com", // Web
+            "106131390766-5tiajbml0itkiohc580sm5mc3t3tiahb.apps.googleusercontent.com", // Android
+            "106131390766-vmcvo280rnguao23e9bkmo76d4fnd850.apps.googleusercontent.com"  // iOS
+    );
+
+    public GoogleTokenVerifier(@Value("${app.auth.google.web-client-id:}") String webClientId) {
+        Set<String> audiences = new HashSet<>(KNOWN_CLIENT_IDS);
+        if (webClientId != null && !webClientId.isBlank() && !webClientId.startsWith("${")) {
+            audiences.add(webClientId.trim());
+        }
+
         this.verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                // 모바일 ID가 아닌 백엔드용 Web Client ID로 대상(Audience) 검증
-                .setAudience(Collections.singletonList(webClientId))
+                .setAudience(audiences)
                 .build();
     }
 
@@ -29,7 +40,7 @@ public class GoogleTokenVerifier {
             }
             return idToken.getPayload();
         } catch (Exception e) {
-            throw new SecurityException("Google 토큰 검증에 실패했습니다. (위변조 또는 만료)", e);
+            throw new SecurityException("Google 토큰 검증에 실패했습니다. (위변조 또는 만료): " + e.getMessage(), e);
         }
     }
 }

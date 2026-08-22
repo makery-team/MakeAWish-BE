@@ -41,7 +41,7 @@ spring:
 app:
   auth:
     google:
-      web-client-id: ${GOOGLE_CLIENT_ID}
+      web-client-id: ${GOOGLE_CLIENT_ID:106131390766-mnqk6vkbs4n33s2tt63om1860e6cgaau.apps.googleusercontent.com}
   server:
     base-url: ${APP_SERVER_BASE_URL:http://localhost:8080}
 
