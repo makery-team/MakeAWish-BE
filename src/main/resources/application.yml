@@ -53,7 +53,7 @@ kakao:
 jwt:
   issuer: ${JWT_ISSUER}
   secret-key: ${JWT_SECRET_KEY}
-  access-expiration: 3600000 # 1시간
+  access-expiration: 604800000 # 7일 (604,800,000ms)
   refresh-expiration: 1209600000 # 14일
 
 cloud:
