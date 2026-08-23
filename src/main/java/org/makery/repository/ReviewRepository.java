@@ -41,4 +41,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<String> findContentsByStoreId(@Param("storeId") Long storeId);
 
     List<Review> findByStoreId(Long storeId);
+
+    /**
+     * 특정 매장의 리뷰 평균 별점 조회 (실시간 집계)
+     */
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.store.id = :storeId")
+    Double findAverageRatingByStoreId(@Param("storeId") Long storeId);
+
+    /**
+     * 특정 매장의 총 리뷰 개수 조회 (실시간 집계)
+     */
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.store.id = :storeId")
+    Integer countByStoreId(@Param("storeId") Long storeId);
 }

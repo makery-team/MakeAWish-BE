@@ -39,8 +39,6 @@ public class ReviewService {
 
     /**
      * 2. [신규] 특정 주문/포트폴리오 기반 리뷰(댓글) 작성
-     * TODO(BACKEND-TECH-DEBT): 리뷰 등록/수정/삭제 시 매장(Store)의 rating(평균 별점) 및 reviewCount(총 리뷰 수)를
-     * 실시간으로 집계(AVG/COUNT 쿼리 또는 비동기 배치)하여 Store 엔티티를 업데이트하는 로직 구현 필요
      */
     @Transactional
     public ReviewResponse createReview(Long orderId, User user, ReviewRequest request) {
@@ -66,6 +64,7 @@ public class ReviewService {
                 .build();
 
         Review savedReview = reviewRepository.save(review);
+        updateStoreRatingAndReviewCount(order.getStore());
         return ReviewResponse.from(savedReview);
     }
 
@@ -84,6 +83,7 @@ public class ReviewService {
 
         // 엔티티 비즈니스 메서드 호출 (더티 체킹 자동 반영)
         review.updateReview(request.content(), request.rating(), request.imageUrl());
+        updateStoreRatingAndReviewCount(review.getStore());
         return ReviewResponse.from(review);
     }
 
@@ -99,7 +99,18 @@ public class ReviewService {
             throw new SecurityException("본인이 작성한 리뷰만 삭제할 수 있습니다.");
         }
 
+        Store store = review.getStore();
         reviewRepository.delete(review);
+        updateStoreRatingAndReviewCount(store);
+    }
+
+    private void updateStoreRatingAndReviewCount(Store store) {
+        if (store == null || store.getId() == null) return;
+        Double avgRating = reviewRepository.findAverageRatingByStoreId(store.getId());
+        Integer count = reviewRepository.countByStoreId(store.getId());
+        store.setRating(avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 0.0);
+        store.setReviewCount(count != null ? count : 0);
+        storeRepository.save(store);
     }
 
     /**

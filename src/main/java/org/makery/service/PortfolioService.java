@@ -74,12 +74,28 @@ public class PortfolioService {
             return getFeed(sortType, pageable);
         }
 
-        Long tagCount = (long) tags.size();
+        // 1. 태그 정제 (# 기호 제거 및 트림)
+        List<String> cleanTags = tags.stream()
+                .filter(t -> t != null && !t.isBlank())
+                .map(t -> t.trim().replaceAll("^#+", ""))
+                .filter(t -> !t.isBlank())
+                .toList();
+
+        if (cleanTags.isEmpty()) {
+            return getFeed(sortType, pageable);
+        }
+
+        List<String> prefixedTags = cleanTags.stream()
+                .map(t -> "#" + t)
+                .toList();
+
+        String firstTag = cleanTags.get(0);
+
         if ("latest".equalsIgnoreCase(sortType)) {
-            return portfolioRepository.findByTagsOrderByCreatedAtDesc(tags, tagCount, pageable)
+            return portfolioRepository.findByTagsOrderByCreatedAtDesc(cleanTags, prefixedTags, firstTag, pageable)
                     .map(PortfolioFeedResponse::from);
         } else {
-            return portfolioRepository.findByTagsOrderByLikeCountDesc(tags, tagCount, pageable)
+            return portfolioRepository.findByTagsOrderByLikeCountDesc(cleanTags, prefixedTags, firstTag, pageable)
                     .map(PortfolioFeedResponse::from);
         }
     }

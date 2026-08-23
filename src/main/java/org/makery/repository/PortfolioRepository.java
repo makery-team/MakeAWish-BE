@@ -24,24 +24,30 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     @Query("select p from Portfolio p join fetch p.store join fetch p.tags order by p.likeCount desc")
     Slice<Portfolio> findAllByOrderByLikeCountDesc(Pageable pageable);
 
-    @Query("select p from Portfolio p " +
-            "join p.tags t " +
-            "where t.name in :tagNames " +
-            "group by p.id " +
-            "having count(t.id) = :tagCount " +
-            "order by p.createdAt desc")
+    @Query("SELECT DISTINCT p FROM Portfolio p " +
+            "LEFT JOIN p.tags t " +
+            "LEFT JOIN p.store s " +
+            "WHERE t.name IN :tagNames " +
+            "   OR t.name IN :prefixedTagNames " +
+            "   OR t.name LIKE CONCAT('%', :firstTag, '%') " +
+            "   OR p.title LIKE CONCAT('%', :firstTag, '%') " +
+            "ORDER BY p.createdAt DESC")
     Slice<Portfolio> findByTagsOrderByCreatedAtDesc(@Param("tagNames") List<String> tagNames,
-                                                    @Param("tagCount") Long tagCount,
+                                                    @Param("prefixedTagNames") List<String> prefixedTagNames,
+                                                    @Param("firstTag") String firstTag,
                                                     Pageable pageable);
 
-    @Query("select p from Portfolio p " +
-            "join p.tags t " +
-            "where t.name in :tagNames " +
-            "group by p.id " +
-            "having count(t.id) = :tagCount " +
-            "order by p.likeCount desc")
+    @Query("SELECT DISTINCT p FROM Portfolio p " +
+            "LEFT JOIN p.tags t " +
+            "LEFT JOIN p.store s " +
+            "WHERE t.name IN :tagNames " +
+            "   OR t.name IN :prefixedTagNames " +
+            "   OR t.name LIKE CONCAT('%', :firstTag, '%') " +
+            "   OR p.title LIKE CONCAT('%', :firstTag, '%') " +
+            "ORDER BY p.likeCount DESC, p.createdAt DESC")
     Slice<Portfolio> findByTagsOrderByLikeCountDesc(@Param("tagNames") List<String> tagNames,
-                                                    @Param("tagCount") Long tagCount,
+                                                    @Param("prefixedTagNames") List<String> prefixedTagNames,
+                                                    @Param("firstTag") String firstTag,
                                                     Pageable pageable);
 
     @Query("SELECT t.name FROM Portfolio p " +
