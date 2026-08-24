@@ -36,10 +36,14 @@ public record OrderSummaryResponse(
             phone = order.getUser().getPhoneNumber();
         }
 
+        String storeName = (order.getStore() != null && order.getStore().getName() != null)
+                ? order.getStore().getName()
+                : "매장";
+
         return new OrderSummaryResponse(
                 order.getId(),
                 order.getOrderNumber(),
-                order.getStore().getName(),
+                storeName,
                 order.getStatus(),
                 order.getTotalPrice(),
                 order.getExtraFee() != null ? order.getExtraFee() : 0,

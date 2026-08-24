@@ -17,12 +17,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "where o.id = :orderId")
     Optional<Order> findDetailById(@Param("orderId") Long orderId);
 
-    // 구매자: 본인이 주문한 목록 조회 (최신순)
-    List<Order> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+    // 구매자: 본인이 주문한 목록 조회 (최신순 + Fetch Join으로 N+1 및 NPE 방지)
+    @Query("select distinct o from Order o " +
+            "left join fetch o.store s " +
+            "left join fetch o.user u " +
+            "where o.user.id = :userId " +
+            "order by o.createdAt desc")
+    List<Order> findAllByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
     // [수정] 판매자: @Query를 사용하여 복잡한 객체 탐색을 명확한 JPQL로 대체
-    @Query("select o from Order o " +
-            "join o.store s " +
+    @Query("select distinct o from Order o " +
+            "left join fetch o.store s " +
+            "left join fetch o.user u " +
             "join s.sellerProfile sp " +
             "where sp.user.id = :sellerId " +
             "order by o.createdAt desc")

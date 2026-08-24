@@ -199,14 +199,28 @@ public class OrderService {
     }
 
     /**
-     * 주문 목록 조회 (date 파라미터 지원: "today"일 경우 오늘 주문 필터링)
+     * 주문 목록 조회 (date: "today", roleParam: "consumer" / "seller")
      */
-    public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role, String date) {
+    public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role, String date, String roleParam) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        UserRole effectiveRole = (user.getUserRole() != null) ? user.getUserRole() : role;
-        boolean isSeller = (effectiveRole == UserRole.ROLE_SELLER) || (user.getSellerProfile() != null);
+        boolean isSeller;
+        if ("consumer".equalsIgnoreCase(roleParam) || "customer".equalsIgnoreCase(roleParam)) {
+            // 소비자 앱: 무조건 내가 주문한 내역(구매자 모드)
+            isSeller = false;
+        } else if ("seller".equalsIgnoreCase(roleParam)) {
+            // 사장님 웹: 무조건 내 매장으로 들어온 주문(판매자 모드)
+            isSeller = true;
+        } else {
+            // role 파라미터가 없는 경우
+            if ("today".equalsIgnoreCase(date)) {
+                isSeller = true;
+            } else {
+                UserRole effectiveRole = (user.getUserRole() != null) ? user.getUserRole() : role;
+                isSeller = (effectiveRole == UserRole.ROLE_SELLER) || (user.getSellerProfile() != null);
+            }
+        }
 
         List<Order> orders;
 
@@ -240,6 +254,10 @@ public class OrderService {
         return orders.stream()
                 .map(OrderSummaryResponse::from)
                 .toList();
+    }
+
+    public List<OrderSummaryResponse> getMyOrders(Long userId, UserRole role, String date) {
+        return getMyOrders(userId, role, date, null);
     }
 
     /**
