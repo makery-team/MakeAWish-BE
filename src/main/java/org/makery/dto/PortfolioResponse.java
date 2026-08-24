@@ -22,6 +22,14 @@ public record PortfolioResponse(
         LocalDateTime createdAt
 ) {
     public static PortfolioResponse from(Portfolio portfolio) {
+        List<String> tagList = portfolio.getTags() != null
+                ? new java.util.ArrayList<>(portfolio.getTags().stream().map(Tag::getName).toList())
+                : new java.util.ArrayList<>();
+        if (portfolio.getPrimaryTag() != null && !portfolio.getPrimaryTag().isBlank()) {
+            tagList.remove(portfolio.getPrimaryTag());
+            tagList.add(0, portfolio.getPrimaryTag());
+        }
+
         return PortfolioResponse.builder()
                 .portfolioId(portfolio.getId())
                 .storeId(portfolio.getStore() != null ? portfolio.getStore().getId() : null)
@@ -32,9 +40,7 @@ public record PortfolioResponse(
                 .imageUrl(portfolio.getImageUrl())
                 .isInpaintingAllowed(portfolio.isInpaintingAllowed())
                 .likeCount(portfolio.getLikeCount())
-                .tags(portfolio.getTags() != null
-                        ? portfolio.getTags().stream().map(Tag::getName).toList()
-                        : List.of())
+                .tags(tagList)
                 .createdAt(portfolio.getCreatedAt())
                 .build();
     }

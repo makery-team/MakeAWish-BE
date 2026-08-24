@@ -64,17 +64,19 @@ public class OrderController {
     }
 
     /**
-     * 내 주문 목록 조회 API (date=today 지원)
+     * 내 주문 목록 조회 API (date=today 및 role=consumer/seller 지원)
      */
     @GetMapping
     public ResponseEntity<List<OrderSummaryResponse>> getMyOrders(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestParam(required = false) String date) {
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String role) {
 
         List<OrderSummaryResponse> responses = orderService.getMyOrders(
                 principalDetails.user().getId(),
                 principalDetails.user().getUserRole(),
-                date
+                date,
+                role
         );
 
         return ResponseEntity.ok(responses);

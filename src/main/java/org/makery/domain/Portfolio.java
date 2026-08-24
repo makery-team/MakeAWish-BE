@@ -47,6 +47,11 @@ public class Portfolio extends BaseEntity {
     @Builder.Default
     private Set<Tag> tags = new java.util.LinkedHashSet<>();
 
+    /**
+     * 사장님이 지정한 대표 태그 (소비자 앱 카드 뱃지용)
+     */
+    private String primaryTag;
+
     @Builder.Default
     private boolean isInpaintingAllowed = true;
 
@@ -56,5 +61,11 @@ public class Portfolio extends BaseEntity {
     public void updateInpaintingAndTags(boolean isInpaintingAllowed, Set<Tag> tags) {
         this.isInpaintingAllowed = isInpaintingAllowed;
         this.tags = tags;
+    }
+
+    public void updateTagsAndPrimaryTag(boolean isInpaintingAllowed, Set<Tag> tags, String primaryTag) {
+        this.isInpaintingAllowed = isInpaintingAllowed;
+        this.tags = tags;
+        this.primaryTag = primaryTag;
     }
 }
