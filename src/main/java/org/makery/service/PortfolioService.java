@@ -158,6 +158,8 @@ public class PortfolioService {
             }
         }
 
+        String primaryTag = (request.getTags() != null && !request.getTags().isEmpty()) ? request.getTags().get(0) : null;
+
         Portfolio portfolio = Portfolio.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -165,6 +167,7 @@ public class PortfolioService {
                 .product(product)
                 .store(store)
                 .tags(tags)
+                .primaryTag(primaryTag)
                 .isInpaintingAllowed(request.getIsInpaintingAllowed() != null ? request.getIsInpaintingAllowed() : true)
                 .build();
 
@@ -193,6 +196,8 @@ public class PortfolioService {
         }
 
         if (request.getTags() != null) {
+            String primaryTag = !request.getTags().isEmpty() ? request.getTags().get(0) : null;
+            portfolio.setPrimaryTag(primaryTag);
             Set<Tag> updatedTags = request.getTags().stream()
                     .map(tagName -> tagRepository.findByName(tagName)
                             .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build())))
