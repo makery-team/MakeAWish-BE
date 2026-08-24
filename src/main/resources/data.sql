@@ -1,26 +1,26 @@
-SET FOREIGN_KEY_CHECKS = 0;
-
-DELETE FROM ai_agent_messages;
-DELETE FROM ai_inpainted_designs;
-DELETE FROM notifications;
-DELETE FROM device_tokens;
-DELETE FROM likes;
-DELETE FROM portfolio_tags;
-DELETE FROM reviews;
-DELETE FROM order_items;
-DELETE FROM orders;
-DELETE FROM payments;
-DELETE FROM portfolios;
-DELETE FROM products;
-DELETE FROM categories;
-DELETE FROM stores;
-DELETE FROM seller_profiles;
-DELETE FROM tags;
-DELETE FROM users;
-DELETE FROM chat_room;
-DELETE FROM chat_message;
-
-SET FOREIGN_KEY_CHECKS = 1;
+-- 🌟 DB 영구 보존 모드 (mode: never) 적용
+-- 자동 삭제 구문 비활성화됨
+-- SET FOREIGN_KEY_CHECKS = 0;
+-- DELETE FROM ai_agent_messages;
+-- DELETE FROM ai_inpainted_designs;
+-- DELETE FROM notifications;
+-- DELETE FROM device_tokens;
+-- DELETE FROM likes;
+-- DELETE FROM portfolio_tags;
+-- DELETE FROM reviews;
+-- DELETE FROM order_items;
+-- DELETE FROM orders;
+-- DELETE FROM payments;
+-- DELETE FROM portfolios;
+-- DELETE FROM products;
+-- DELETE FROM categories;
+-- DELETE FROM stores;
+-- DELETE FROM seller_profiles;
+-- DELETE FROM tags;
+-- DELETE FROM users;
+-- DELETE FROM chat_room;
+-- DELETE FROM chat_message;
+-- SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1. 유저 (Users) - 5명, 전원 구글 로그인, 1번 관리자
 INSERT INTO users (id, email, password, name, nickname, phone_number, language, user_role, o_auth_provider, order_push_enabled, chat_push_enabled, marketing_push_enabled, created_at, modified_at) VALUES

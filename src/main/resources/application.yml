@@ -28,7 +28,7 @@ spring:
 
   sql:
     init:
-      mode: always
+      mode: never
 
   cloud:
     openfeign:
