@@ -37,7 +37,7 @@ jobs:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: make-a-wish
-          environment_name: Make-a-wish-env
+          environment_name: Makery-env
           version_label: github-action-${{ github.sha }}
           region: ap-northeast-2
           deployment_package: deploy/deploy.zip

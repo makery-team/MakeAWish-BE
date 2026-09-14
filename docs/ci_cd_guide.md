@@ -35,7 +35,7 @@ GitHub Actions 로봇이 AWS에 접속하려면 전용 열쇠가 필요합니다
 1.  **트리거**: `main` 브랜치에 코드가 push(merge)될 때 작동을 시작합니다.
 2.  **환경 세팅 (Set up JDK 21)**: 백엔드가 Java 21을 사용하고 있으므로, 배포 서버 환경도 Java 21로 맞춥니다. *(이전 빌드 오류가 났던 원인이 바로 이 부분이 17로 되어 있었기 때문이며 현재 21로 수정 완료되었습니다.)*
 3.  **빌드 (Build with Gradle)**: `./gradlew build -x test` 명령어로 `.jar` 파일을 생성합니다.
-4.  **AWS 배포 (Deploy to Elastic Beanstalk)**: 깃허브 비밀금고(Secrets)에 넣어둔 열쇠를 꺼내 AWS에 접속한 뒤, 방금 만든 `.jar` 파일을 `make-a-wish-env` 서버 환경으로 넘겨 배포를 마칩니다.
+4.  **AWS 배포 (Deploy to Elastic Beanstalk)**: 깃허브 비밀금고(Secrets)에 넣어둔 열쇠를 꺼내 AWS에 접속한 뒤, 방금 만든 `.jar` 파일을 `Makery-env` 서버 환경으로 넘겨 배포를 마칩니다.
 
 ## 4. 트러블슈팅 이력
 초기 구축 시 아래와 같은 오류들을 해결하여 자동화 파이프라인을 안정시켰습니다.

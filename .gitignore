@@ -38,5 +38,6 @@ bin/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
-.DS_Store.env
+.DS_Store
+.env
+.env*.local
